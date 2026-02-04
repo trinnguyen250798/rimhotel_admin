@@ -10,10 +10,10 @@ import { useSignIn } from "@/hooks/useSignIn";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+
   
   // Use the hook as a ViewModel
-  const { formData, isLoading, error, handleChange, handleSubmit } = useSignIn();
+  const { formData, isLoading, error, handleChange, handleSubmit, remember, setRemember } = useSignIn();
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
@@ -23,14 +23,14 @@ export default function SignInForm() {
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
           <ChevronLeftIcon />
-          Back to dashboard
+          Quay lại trang chủ
         </Link>
       </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign In
+              Đăng nhập
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Vui lòng nhập thông tin email và mật khẩu để đăng nhập!
@@ -84,7 +84,7 @@ export default function SignInForm() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Checkbox checked={isChecked} onChange={setIsChecked} />
+                    <Checkbox checked={remember} onChange={setRemember} />
                     <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
                       Ghi nhớ đăng nhập
                     </span>

@@ -11,6 +11,7 @@ export const useSignIn = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [remember, setRemember] = useState(false);
   const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,9 +37,9 @@ export const useSignIn = () => {
     setError(null);
 
     try {
-      const data = await AuthService.login(formData);
+      const data = await AuthService.login({ ...formData, remember_me: remember });
       const { token, user } = data;
-      login(token, user);
+      login(token, user, remember);
     } catch (err: any) {
       console.error("Login failed:", err);
       if (err.response && err.response.data && err.response.data.message) {
@@ -55,6 +56,8 @@ export const useSignIn = () => {
     formData,
     isLoading,
     error,
+    remember,
+    setRemember,
     handleChange,
     handleSubmit,
   };

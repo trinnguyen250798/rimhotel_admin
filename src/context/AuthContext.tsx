@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user: User) => void;
+  login: (token: string, user: User, remember: boolean) => void;
   logout: () => void;
 }
 
@@ -29,7 +29,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem("token");
+      // Check both storages
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       if (token) {
           // Verify token or just assume valid for now and let interceptor handle 401
           // Ideally fetch user profile here
@@ -50,8 +51,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initAuth();
   }, []);
 
-  const login = (token: string, userData: User) => {
-    localStorage.setItem("token", token);
+  const login = (token: string, userData: User, remember: boolean) => {
+    if (remember) {
+      localStorage.setItem("token", token);
+    } else {
+      sessionStorage.setItem("token", token);
+    }
     setUser(userData);
     setIsAuthenticated(true);
     router.push("/");
@@ -59,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
     setUser(null);
     setIsAuthenticated(false);
     router.push("/signin");
