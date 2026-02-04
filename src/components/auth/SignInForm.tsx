@@ -1,4 +1,3 @@
-"use client";
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -6,50 +5,14 @@ import Button from "@/components/ui/button/Button";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "@/icons";
 import Link from "next/link";
 import React, { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import axiosClient from "@/lib/axios";
+import { useSignIn } from "@/hooks/useSignIn";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!email || !password) {
-      setError("Vui lòng nhập đầy đủ email và mật khẩu.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await axiosClient.post("/login", {
-        email,
-        password,
-      });
-      console.log(response);
-      const { token, user } = response.data;
-
-      login(token, user);
-    } catch (err: any) {
-      console.error("Login failed:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("Đăng nhập thất bại. Vui lòng thử lại.");
-      }
-    } finally {
-      
-      setIsLoading(false);
-    }
-  };
+  
+  // Use the hook as a ViewModel
+  const { formData, isLoading, error, handleChange, handleSubmit } = useSignIn();
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
@@ -85,10 +48,11 @@ export default function SignInForm() {
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
                   <Input 
+                    name="email"
                     placeholder="...@gmail.com" 
                     type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)} 
+                    value={formData.email}
+                    onChange={handleChange} 
                     disabled={isLoading}
                   />
                 </div>
@@ -98,10 +62,11 @@ export default function SignInForm() {
                   </Label>
                   <div className="relative">
                     <Input
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formData.password || ""}
+                      onChange={handleChange}
                       disabled={isLoading}
                     />
                     <span
