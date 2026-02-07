@@ -1,9 +1,13 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useEffect, useState } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import HotelForm from "../_components/HotelForm";
 import Link from "next/link";
+import { useHotels } from "@/hooks/useHotels";
+import { HotelService } from "@/services/hotel.service";
+import { Hotel, HotelFormData } from "@/types/hotel";
+import { useRouter } from "next/navigation";
 
 interface PageProps {
   params: Promise<{
@@ -13,18 +17,38 @@ interface PageProps {
 
 export default function HotelDetailsPage({ params }: PageProps) {
   const { hotelId } = use(params);
-  // Mock fetching data
-  const initialData = {
-    name: "Rim Hotel Da Nang",
-    address: "123 Bien, Da Nang",
-    description: "A beautiful hotel near the beach.",
-    starRating: 4,
-    status: "Active",
+  const [hotel, setHotel] = useState<Hotel | null>(null);
+  const { updateHotel, loading } = useHotels();
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchHotel = async () => {
+      try {
+        const data = await HotelService.getById(Number(hotelId));
+        setHotel(data);
+      } catch (err) {
+        console.error("Failed to fetch hotel", err);
+      }
+    };
+    fetchHotel();
+  }, [hotelId]);
+
+  const handleSubmit = async (data: HotelFormData) => {
+    try {
+      await updateHotel(Number(hotelId), data);
+      router.push("/hotel");
+    } catch (err) {
+      // Error is handled in the hook
+    }
   };
 
-  const handleSubmit = (data: Record<string, any>) => {
-    console.log("Update hotel", data);
-  };
+  if (!hotel) {
+    return (
+        <div className="flex items-center justify-center p-10">
+            <p className="text-gray-500">Loading hotel details...</p>
+        </div>
+    );
+  }
 
   return (
     <div>
@@ -41,7 +65,7 @@ export default function HotelDetailsPage({ params }: PageProps) {
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <HotelForm initialData={initialData} onSubmit={handleSubmit} />
+        <HotelForm initialData={hotel} onSubmit={handleSubmit} isSubmitting={loading} />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -13,14 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/button/Button"; // Fixed: default import
 
-interface Hotel {
-  id: string;
-  name: string;
-  address: string;
-  starRating: number;
-  status: "Active" | "Inactive";
-  imageUrl: string;
-}
+import { Hotel } from "@/types/hotel";
 
 interface HotelTableProps {
   hotels: Hotel[];
@@ -60,30 +53,30 @@ export default function HotelTable({ hotels, onDelete }: HotelTableProps) {
                       <div className="w-10 h-10 overflow-hidden rounded-full relative">
                         <Image
                           fill
-                          src={hotel.imageUrl || "/images/hotel/placeholder.jpg"} // Placeholder if no image
-                          alt={hotel.name}
+                          src="/images/hotel/placeholder.jpg"
+                          alt={hotel.hotel_name}
                           className="object-cover"
                         />
                       </div>
                       <div>
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {hotel.name}
+                          {hotel.hotel_name}
                         </span>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {hotel.address}
+                    {`${hotel.ward}, ${hotel.district}, ${hotel.city}`}
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {hotel.starRating} Stars
+                    {hotel.star_rating} Stars
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
-                      color={hotel.status === "Active" ? "success" : "error"}
+                      color="success"
                     >
-                      {hotel.status}
+                      Active
                     </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
@@ -92,7 +85,7 @@ export default function HotelTable({ hotels, onDelete }: HotelTableProps) {
                         Edit
                       </Link>
                       <button 
-                        onClick={() => onDelete(hotel.id)}
+                        onClick={() => onDelete(String(hotel.id))}
                         className="text-error hover:underline text-red-500"
                       >
                         Delete

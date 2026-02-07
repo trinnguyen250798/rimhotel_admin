@@ -1,34 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import HotelTable from "./_components/HotelTable";
 import Button from "@/components/ui/button/Button";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
+import { useHotels } from "@/hooks/useHotels";
+import { HotelService } from "@/services/hotel.service";
+import { Hotel } from "@/types/hotel";
 
 export default function HotelListPage() {
-  // Mock data for now
-  const hotels = [
-    {
-      id: "1",
-      name: "Rim Hotel Da Nang",
-      address: "123 Bien, Da Nang",
-      starRating: 4,
-      status: "Active" as "Active" | "Inactive",
-      imageUrl: "",
-    },
-    {
-      id: "2",
-      name: "Rim Hotel Ha Noi",
-      address: "456 Pho Hue, Ha Noi",
-      starRating: 5,
-      status: "Active" as "Active" | "Inactive",
-      imageUrl: "",
-    },
-  ];
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+  const { deleteHotel } = useHotels();
 
-  const handleDelete = (id: string) => {
-    console.log("Delete hotel", id);
+  const fetchHotels = async () => {
+    try {
+      const data = await HotelService.getAll();
+      setHotels(data);
+    } catch (err) {
+      console.error("Failed to fetch hotels", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchHotels();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this hotel?")) {
+      try {
+        await deleteHotel(Number(id));
+        fetchHotels();
+      } catch (err) {
+        // Error is handled in the hook
+      }
+    }
   };
 
   return (
