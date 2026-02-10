@@ -39,9 +39,9 @@ export default function RoomListPage({ params }: PageProps) {
   return (
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <PageBreadcrumb pageTitle="Hotel Rooms" />
+        <PageBreadcrumb pageTitle="Danh sách phòng" />
         <Link href={`/hotel/${hotelId}/rooms/create`}>
-          <Button>+ Add Room</Button>
+          <Button>+ Thêm phòng</Button>
         </Link>
       </div>
 

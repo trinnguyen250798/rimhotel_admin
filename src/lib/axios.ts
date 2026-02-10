@@ -35,13 +35,13 @@ axiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // You can unwrap the response data here if you prefer only dealing with data
     // return response.data;
-    return response;
+    return response.data;
   },
   (error) => {
     // Global error handling
     if (error.response) {
       const { status } = error.response;
-      
+
       switch (status) {
         case 401:
           // Handle unauthorized (e.g., clear token and redirect)
@@ -51,9 +51,9 @@ axiosClient.interceptors.response.use(
           // Handle forbidden
           break;
         case 422:
-            // Handle validation errors (Laravel standard)
-            // console.warn('Validation Error', error.response.data.errors);
-            break;
+          // Handle validation errors (Laravel standard)
+          // console.warn('Validation Error', error.response.data.errors);
+          break;
         case 500:
           // Handle server error
           break;

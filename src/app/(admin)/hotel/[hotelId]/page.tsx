@@ -44,23 +44,23 @@ export default function HotelDetailsPage({ params }: PageProps) {
 
   if (!hotel) {
     return (
-        <div className="flex items-center justify-center p-10">
-            <p className="text-gray-500">Loading hotel details...</p>
-        </div>
+      <div className="flex items-center justify-center p-10">
+        <p className="text-gray-500">Đang tải thông tin khách sạn...</p>
+      </div>
     );
   }
 
   return (
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <PageBreadcrumb pageTitle="Hotel Details" />
+        <PageBreadcrumb pageTitle="Chi tiết khách sạn" />
         <div className="flex gap-2">
-            <Link href={`/hotel/${hotelId}/rooms`} className="inline-flex items-center justify-center rounded-lg bg-primary/[0.1] px-4 py-2 text-sm font-medium text-primary hover:bg-primary/[0.2]">
-                Manage Rooms
-            </Link>
-             <Link href={`/hotel/${hotelId}/prices`} className="inline-flex items-center justify-center rounded-lg bg-primary/[0.1] px-4 py-2 text-sm font-medium text-primary hover:bg-primary/[0.2]">
-                Prices
-            </Link>
+          <Link href={`/hotel/${hotelId}/rooms`} className="inline-flex items-center justify-center rounded-lg bg-primary/[0.1] px-4 py-2 text-sm font-medium text-primary hover:bg-primary/[0.2]">
+            Quản lý phòng
+          </Link>
+          <Link href={`/hotel/${hotelId}/prices`} className="inline-flex items-center justify-center rounded-lg bg-primary/[0.1] px-4 py-2 text-sm font-medium text-primary hover:bg-primary/[0.2]">
+            Giá cả
+          </Link>
         </div>
       </div>
 
@@ -69,14 +69,14 @@ export default function HotelDetailsPage({ params }: PageProps) {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Link href={`/hotel/${hotelId}/images`} className="block rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white">Images</h3>
-            <p className="text-sm text-gray-500">Manage hotel gallery</p>
-          </Link>
-          <Link href={`/hotel/${hotelId}/amenities`} className="block rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-white">Amenities</h3>
-            <p className="text-sm text-gray-500">Manage hotel amenities</p>
-          </Link>
+        <Link href={`/hotel/${hotelId}/images`} className="block rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <h3 className="text-lg font-medium text-gray-800 dark:text-white">Hình ảnh</h3>
+          <p className="text-sm text-gray-500">Quản lý album ảnh khách sạn</p>
+        </Link>
+        <Link href={`/hotel/${hotelId}/amenities`} className="block rounded-xl border border-gray-200 bg-white p-4 hover:shadow-lg dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <h3 className="text-lg font-medium text-gray-800 dark:text-white">Tiện nghi</h3>
+          <p className="text-sm text-gray-500">Quản lý các tiện nghi của khách sạn</p>
+        </Link>
       </div>
     </div>
   );

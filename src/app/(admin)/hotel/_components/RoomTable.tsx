@@ -34,19 +34,19 @@ export default function RoomTable({ rooms, hotelId, onDelete }: RoomTableProps) 
             <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
               <TableRow>
                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                  Room Name
+                  Tên phòng
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                  Type
+                  Loại phòng
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                  Base Price
+                  Giá cơ bản
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                  Status
+                  Trạng thái
                 </TableCell>
                 <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                  Actions
+                  Thao tác
                 </TableCell>
               </TableRow>
             </TableHeader>
@@ -71,8 +71,8 @@ export default function RoomTable({ rooms, hotelId, onDelete }: RoomTableProps) 
                         room.status === "Available"
                           ? "success"
                           : room.status === "Booked"
-                          ? "warning"
-                          : "error"
+                            ? "warning"
+                            : "error"
                       }
                     >
                       {room.status}
@@ -83,7 +83,7 @@ export default function RoomTable({ rooms, hotelId, onDelete }: RoomTableProps) 
                       <Link href={`/hotel/${hotelId}/rooms/${room.id}`} className="text-primary hover:underline">
                         Edit
                       </Link>
-                      <button 
+                      <button
                         onClick={() => onDelete(room.id)}
                         className="text-error hover:underline text-red-500"
                       >

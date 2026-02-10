@@ -16,7 +16,7 @@ export default function HotelListPage() {
   const fetchHotels = async () => {
     try {
       const data = await HotelService.getAll();
-      setHotels(data);
+      setHotels(data.data);
     } catch (err) {
       console.error("Failed to fetch hotels", err);
     }
@@ -27,7 +27,7 @@ export default function HotelListPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this hotel?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa khách sạn này không?")) {
       try {
         await deleteHotel(Number(id));
         fetchHotels();
@@ -40,9 +40,9 @@ export default function HotelListPage() {
   return (
     <div>
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <PageBreadcrumb pageTitle="Hotels" />
+        <PageBreadcrumb pageTitle="Danh sách khách sạn" />
         <Link href="/hotel/create">
-          <Button>+ Add Hotel</Button>
+          <Button>+ Thêm khách sạn</Button>
         </Link>
       </div>
 

@@ -1,8 +1,8 @@
 import axiosClient from "@/lib/axios";
-import { Hotel, HotelFormData } from "@/types/hotel";
+import { Hotel, HotelFormData, HotelResponse } from "@/types/hotel";
 
 export const HotelService = {
-  getAll: async (): Promise<Hotel[]> => {
+  getAll: async (): Promise<HotelResponse> => {
     const response = await axiosClient.get("/hotels");
     return response.data;
   },

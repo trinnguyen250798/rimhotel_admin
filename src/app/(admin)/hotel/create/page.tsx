@@ -14,7 +14,7 @@ export default function HotelCreatePage() {
   const handleSubmit = async (data: HotelFormData) => {
     try {
       await createHotel(data);
-      router.push("/hotel");
+      router.push("/hotels");
     } catch (err) {
       // Error is handled in the hook
     }
