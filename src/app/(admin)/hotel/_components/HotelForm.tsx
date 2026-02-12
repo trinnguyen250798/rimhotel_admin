@@ -11,10 +11,15 @@ interface HotelFormProps {
   initialData?: Partial<Hotel>;
   onSubmit: (data: HotelFormData) => void;
   isSubmitting?: boolean;
+  errors?: Record<string, string[]>;
 }
 
-export default function HotelForm({ initialData, onSubmit, isSubmitting }: HotelFormProps) {
+export default function HotelForm({ initialData, onSubmit, isSubmitting, errors }: HotelFormProps) {
   const isEdit = !!initialData?.id;
+
+  const getFieldError = (fieldName: string) => {
+    return errors && errors[fieldName] ? errors[fieldName][0] : undefined;
+  };
 
   const [formData, setFormData] = useState<HotelFormData>({
     hotel_name: initialData?.hotel_name || "",
@@ -69,6 +74,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập tên khách sạn"
               value={formData.hotel_name}
               onChange={handleInputChange}
+              error={!!getFieldError("hotel_name")}
+              hint={getFieldError("hotel_name")}
             />
           </div>
 
@@ -82,6 +89,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               max="5"
               value={formData.star_rating}
               onChange={handleInputChange}
+              error={!!getFieldError("star_rating")}
+              hint={getFieldError("star_rating")}
             />
           </div>
 
@@ -93,6 +102,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="https://vi-du.com"
               value={formData.website}
               onChange={handleInputChange}
+              error={!!getFieldError("website")}
+              hint={getFieldError("website")}
             />
           </div>
         </div>
@@ -112,6 +123,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập tên thành phố"
               value={formData.city}
               onChange={handleInputChange}
+              error={!!getFieldError("city")}
+              hint={getFieldError("city")}
             />
           </div>
           <div className="col-span-1">
@@ -122,6 +135,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập tên quận/huyện"
               value={formData.district}
               onChange={handleInputChange}
+              error={!!getFieldError("district")}
+              hint={getFieldError("district")}
             />
           </div>
           <div className="col-span-1">
@@ -132,6 +147,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập tên phường/xã"
               value={formData.ward}
               onChange={handleInputChange}
+              error={!!getFieldError("ward")}
+              hint={getFieldError("ward")}
             />
           </div>
         </div>
@@ -145,6 +162,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Dán liên kết Google Maps"
               value={formData.google_map_url}
               onChange={handleInputChange}
+              error={!!getFieldError("google_map_url")}
+              hint={getFieldError("google_map_url")}
             />
           </div>
           <div className="col-span-1">
@@ -199,6 +218,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập tên công ty"
               value={formData.company_name}
               onChange={handleInputChange}
+              error={!!getFieldError("company_name")}
+              hint={getFieldError("company_name")}
             />
           </div>
           <div className="col-span-1">
@@ -209,6 +230,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập mã số thuế"
               value={formData.tax_code}
               onChange={handleInputChange}
+              error={!!getFieldError("tax_code")}
+              hint={getFieldError("tax_code")}
             />
           </div>
           <div className="col-span-1">
@@ -219,6 +242,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
               placeholder="Nhập số giấy phép"
               value={formData.license_no}
               onChange={handleInputChange}
+              error={!!getFieldError("license_no")}
+              hint={getFieldError("license_no")}
             />
           </div>
         </div>
@@ -259,6 +284,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
             value={formData.description}
             onChange={(value) => handleChange("description", value)}
             rows={4}
+            error={!!getFieldError("description")}
+            hint={getFieldError("description")}
           />
         </div>
         <div>
@@ -268,6 +295,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting }: Hotel
             value={formData.policies}
             onChange={(value) => handleChange("policies", value)}
             rows={4}
+            error={!!getFieldError("policies")}
+            hint={getFieldError("policies")}
           />
         </div>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

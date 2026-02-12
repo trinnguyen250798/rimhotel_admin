@@ -14,8 +14,8 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  token: string;
+  access_token: string;
   user: User;
-  status: boolean;
+  status?: boolean;
   message?: string;
 }

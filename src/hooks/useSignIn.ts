@@ -38,8 +38,8 @@ export const useSignIn = () => {
 
     try {
       const data = await AuthService.login({ ...formData, remember_me: remember });
-      const { token, user } = data;
-      login(token, user, remember);
+      const { access_token, user } = data;
+      login(access_token, user, remember);
     } catch (err: any) {
       console.error("Login failed:", err);
       if (err.response && err.response.data && err.response.data.message) {

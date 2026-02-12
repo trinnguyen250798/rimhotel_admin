@@ -16,9 +16,8 @@ const axiosClient: AxiosInstance = axios.create(config);
 // Request interceptor
 axiosClient.interceptors.request.use(
   (config) => {
-    // Attempt to get token from storage (adjust based on your auth implementation)
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -45,7 +44,11 @@ axiosClient.interceptors.response.use(
       switch (status) {
         case 401:
           // Handle unauthorized (e.g., clear token and redirect)
-          // console.warn('Unauthorized - Redirecting to login...');
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          if (typeof window !== 'undefined') {
+            window.location.href = '/signin';
+          }
           break;
         case 403:
           // Handle forbidden
