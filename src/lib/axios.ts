@@ -47,7 +47,7 @@ axiosClient.interceptors.response.use(
           localStorage.removeItem('token');
           sessionStorage.removeItem('token');
           if (typeof window !== 'undefined') {
-            window.location.href = '/signin';
+            // window.location.href = '/signin';
           }
           break;
         case 403:

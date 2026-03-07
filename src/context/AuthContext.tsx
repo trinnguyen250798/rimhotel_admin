@@ -2,14 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axiosClient from "@/lib/axios";
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  // Add other fields as needed
-}
+import { User } from "@/types/auth";
 
 interface AuthContextType {
   user: User | null;

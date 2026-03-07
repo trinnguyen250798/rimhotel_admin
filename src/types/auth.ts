@@ -1,8 +1,10 @@
 export interface User {
-  id: number;
-  getAllPermissions: string[];
+  ulid: string;
   email: string;
   name: string;
+  phone: string;
+  role: string;
+  role_id: number;
   avatar?: string;
   // Add other user properties as needed
 }
