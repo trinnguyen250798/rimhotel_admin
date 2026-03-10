@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setUser(userData);
     setIsAuthenticated(true);
-    router.push("/");
+    router.push("/home");
   };
 
   const logout = () => {
