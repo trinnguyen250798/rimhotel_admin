@@ -1,11 +1,11 @@
 export interface Hotel {
   id: number;
-  hotel_name: string;
+  name: string;
   city: string;
   district: string;
   ward: string;
   website: string;
-  star_rating: number;
+  star: number;
   latitude: string;
   longitude: string;
   google_map_url: string;
@@ -21,6 +21,7 @@ export interface Hotel {
   languages: string;
   created_at?: string;
   updated_at?: string;
+  image?: string;
 }
 
 export interface HotelResponse {
