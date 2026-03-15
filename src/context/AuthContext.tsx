@@ -1,9 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
-
+import { useRouter } from "next/navigation";
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
@@ -16,55 +15,62 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const router = useRouter();
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter()
   useEffect(() => {
-    const initAuth = async () => {
-      // Check both storages
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      if (token) {
-          // Verify token or just assume valid for now and let interceptor handle 401
-          // Ideally fetch user profile here
-          try {
-             // const response = await axiosClient.get('/user');
-             // setUser(response.data);
-             setIsAuthenticated(true);
-          } catch (error) {
-             // Invalid token
-             // logout(); 
-             // For now we just assume true if token exists to match "vào thì check đã login chưa" simple requirement
-             setIsAuthenticated(true);
-          }
-      }
-      setIsLoading(false);
-    };
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
 
-    initAuth();
+    // Read user from whichever storage has it
+    const storedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+
+    if (token) {
+      // Token is enough to consider the session valid.
+      // User data is a bonus — restore it if available.
+      setIsAuthenticated(true);
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch {
+          // Corrupted user JSON — clear it but keep the session alive.
+          localStorage.removeItem("user");
+          sessionStorage.removeItem("user");
+        }
+      }
+    }
+
+    setIsLoading(false);
   }, []);
 
   const login = (token: string, userData: User, remember: boolean) => {
-    if (remember) {
-      localStorage.setItem("token", token);
-    } else {
-      sessionStorage.setItem("token", token);
-    }
+    const storage = remember ? localStorage : sessionStorage;
+
+    storage.setItem("token", token);
+    storage.setItem("user", JSON.stringify(userData));
+
     setUser(userData);
     setIsAuthenticated(true);
-    router.push("/");
+    router.push("/home");
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
     sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+
     setUser(null);
     setIsAuthenticated(false);
     router.push("/signin");
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -72,8 +78,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
+
   return context;
 };
