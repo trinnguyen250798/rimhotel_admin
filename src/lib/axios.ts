@@ -43,11 +43,9 @@ axiosClient.interceptors.response.use(
 
       switch (status) {
         case 401:
-          // Handle unauthorized (e.g., clear token and redirect)
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          // Dispatch event so AuthContext handles logout properly
           if (typeof window !== 'undefined') {
-            // window.location.href = '/signin';
+            window.dispatchEvent(new Event('auth:logout'));
           }
           break;
         case 403:
