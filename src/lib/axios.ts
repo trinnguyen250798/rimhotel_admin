@@ -2,12 +2,12 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Default config for the axios instance
 const config: AxiosRequestConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://rimhotel.onrender.com/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 10000, // 10 seconds timeout
+  timeout: 60000, // 60 seconds timeout
   withCredentials: true, // often needed for Laravel Sanctum cookies if on same domain, or CORS
 };
 
@@ -18,9 +18,14 @@ axiosClient.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (token && config.headers) {
+
+      // Do not attach token for login request
+      const isLoginRequest = config.url?.includes('/login');
+
+      if (token && config.headers && !isLoginRequest) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      console.log(localStorage.getItem('user'));
     }
     return config;
   },

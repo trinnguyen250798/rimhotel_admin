@@ -28,8 +28,8 @@ export default function PropertyGrid() {
         <PropertyCard
           key={hotel.id}
           image=""
-          rating={hotel.star_rating}
-          name={hotel.hotel_name}
+          rating={hotel.star}
+          name={hotel.name}
           location={`${hotel.city}, ${hotel.district}`}
           tier={hotel.company_name}
           occupancy="—"

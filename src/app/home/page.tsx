@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function HotelPage() {
     return (
         <div className="layout-container flex h-full grow flex-col min-h-screen bg-[#f8f6f6] dark:bg-[#221610] text-slate-900 dark:text-slate-100 font-sans">
-            <main className="flex flex-col flex-1 mx-auto w-full">
+            <main className="flex flex-col flex-1 mx-auto w-full bg-white dark:bg-gray-900 ">
                 <PropertyFilter />
                 <PropertyGrid />
             </main>
