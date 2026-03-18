@@ -47,19 +47,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isLoading] = useState(false);
 
-    const login = (token: string, userData: User, remember: boolean) => {
-        const storage = remember ? localStorage : sessionStorage;
+const login = (token: string, userData: User, remember: boolean) => {
+    const storage = remember ? localStorage : sessionStorage;
 
-        storage.setItem("token", token);
-        storage.setItem("user", JSON.stringify(userData));
+    storage.setItem("token", token);
+    storage.setItem("user", JSON.stringify(userData));
 
-        document.cookie = `token=${token}; path=/`;
+    document.cookie = `token=${token}; path=/`;
 
-        setUser(userData);
-        setIsAuthenticated(true);
+    setUser(userData);
+    setIsAuthenticated(true);
 
-        router.replace("/home");
-        };
+    router.replace("/home");
+};
   const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");

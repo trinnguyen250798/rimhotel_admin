@@ -7,7 +7,7 @@ const config: AxiosRequestConfig = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 60000, // 60 seconds timeout
+  timeout: 10000, // 60 seconds timeout
   withCredentials: true, // often needed for Laravel Sanctum cookies if on same domain, or CORS
 };
 
@@ -25,6 +25,7 @@ axiosClient.interceptors.request.use(
       if (token && config.headers && !isLoginRequest) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      console.log(token);
       console.log(localStorage.getItem('user'));
     }
     return config;
@@ -39,7 +40,7 @@ axiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // You can unwrap the response data here if you prefer only dealing with data
     // return response.data;
-    return response.data;
+    return response;
   },
   (error) => {
     // Global error handling

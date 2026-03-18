@@ -1,27 +1,44 @@
 export interface Hotel {
-  id: number;
+  ulid: string;                // thay id
   name: string;
-  city: string;
-  district: string;
-  ward: string;
-  website: string;
-  star: number;
-  latitude: string;
-  longitude: string;
-  google_map_url: string;
-  distance_to_center: number;
-  company_name: string;
-  tax_code: string;
-  license_no: string;
+  slug: string;
+  description: string | null;
+  address: {
+    address: string;
+    district: {
+      id: string;
+      code: string;
+      name: string;
+      province_code: string;
+    };
+    province: {
+      id: string;
+      code: string;
+      name: string;
+      country_code: string;
+    };
+    country: {
+      id: string;
+      code: string;
+      name: string;
+    };
+  };
+  location: {
+    lat: string;
+    lng: string;
+  };
+  star_rating: number;
   checkin_time: string;
   checkout_time: string;
-  description: string;
-  amenities: string;
-  policies: string;
-  languages: string;
+  contact: {
+    phone: string;
+    email: string;
+    website: string;
+  };
+  images: string[] | null;
+  status: boolean;
   created_at?: string;
   updated_at?: string;
-  image?: string;
 }
 
 export interface HotelResponse {
