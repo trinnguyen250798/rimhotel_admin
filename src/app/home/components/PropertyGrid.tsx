@@ -24,10 +24,10 @@ export default function PropertyGrid() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {hotels?.data.map((hotel) => (
+      {hotels?.data.map((hotel: Hotel) => (
         <PropertyCard
           hotel={hotel}
-          key={hotel.id}
+          key={hotel.ulid}
         />
       ))}
       <AddPropertyCard />

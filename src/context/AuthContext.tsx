@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
+import { log } from "console";
 
 interface AuthContextType {
   user: User | null;
@@ -47,33 +48,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isLoading] = useState(false);
 
-const login = (token: string, userData: User, remember: boolean) => {
+  const login = (token: string, userData: User, remember: boolean) => {
     const storage = remember ? localStorage : sessionStorage;
 
     storage.setItem("token", token);
     storage.setItem("user", JSON.stringify(userData));
-
+    console.log(token);
     document.cookie = `token=${token}; path=/`;
 
     setUser(userData);
     setIsAuthenticated(true);
 
     router.replace("/home");
-};
+  };
   const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
 
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
 
-  document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
-  setUser(null);
-  setIsAuthenticated(false);
+    setUser(null);
+    setIsAuthenticated(false);
 
-  router.replace("/signin");
-};
+    router.replace("/signin");
+  };
 
   return (
     <AuthContext.Provider

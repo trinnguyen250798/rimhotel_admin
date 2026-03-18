@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { log } from 'console';
 
 // Default config for the axios instance
 const config: AxiosRequestConfig = {
@@ -25,8 +26,7 @@ axiosClient.interceptors.request.use(
       if (token && config.headers && !isLoginRequest) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      console.log(token);
-      console.log(localStorage.getItem('user'));
+
     }
     return config;
   },
@@ -39,8 +39,7 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // You can unwrap the response data here if you prefer only dealing with data
-    // return response.data;
-    return response;
+    return response.data;
   },
   (error) => {
     // Global error handling
