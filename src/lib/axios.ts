@@ -39,7 +39,7 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response: AxiosResponse) => {
     // You can unwrap the response data here if you prefer only dealing with data
-    return response.data;
+    return response;
   },
   (error) => {
     // Global error handling

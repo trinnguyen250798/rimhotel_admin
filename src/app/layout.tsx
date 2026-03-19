@@ -4,6 +4,8 @@ import "flatpickr/dist/flatpickr.css";
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -23,11 +25,13 @@ export default function RootLayout({
         />
       </head>
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        <AuthProvider>
-          <ThemeProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </ThemeProvider>
-        </AuthProvider>
+        <Provider store={store}>
+          <AuthProvider>
+            <ThemeProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </Provider>
 
       </body>
     </html>

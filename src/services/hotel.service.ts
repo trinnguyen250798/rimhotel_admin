@@ -4,6 +4,7 @@ import { Hotel, HotelFormData, HotelResponse } from "@/types/hotel";
 export const HotelService = {
   getAll: async (): Promise<HotelResponse> => {
     const response = await axiosClient.get("/admin/hotels");
+
     return response.data;
   },
   getById: async (id: number): Promise<Hotel> => {

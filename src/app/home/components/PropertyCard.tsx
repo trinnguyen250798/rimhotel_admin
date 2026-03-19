@@ -1,10 +1,20 @@
+"use client";
 import { Hotel } from "@/types/hotel";
-
-interface PropertyCardProps {
+import { useAppDispatch } from "@/store/hooks";
+import { setHotel } from "@/store/slices/hotelSlice";
+import { useRouter } from "next/navigation";interface PropertyCardProps {
   hotel: Hotel;
 }
 
 export default function PropertyCard({ hotel }: PropertyCardProps) {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const handleEnterDashboard = () => {
+    dispatch(setHotel(hotel));
+    router.push("/");
+  };
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col">
       <div
@@ -52,7 +62,10 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
           </div>
         </div>
 
-        <button className="w-full h-12 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+        <button 
+          onClick={handleEnterDashboard}
+          className="w-full h-12 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+        >
           Enter Dashboard
           <span className="material-symbols-outlined">arrow_forward</span>
         </button>
