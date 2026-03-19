@@ -13,14 +13,14 @@ export const hotelSlice = createSlice({
   name: 'hotelCurrent',
   initialState,
   reducers: {
-    setHotel: (state, action: PayloadAction<Hotel>) => {
+    setHotelCurrent: (state, action: PayloadAction<Hotel>) => {
       state.hotelCurrent = action.payload;
     },
-    clearHotel: (state) => {
+    clearHotelCurrent: (state) => {
       state.hotelCurrent = null;
     }
   },
 });
 
-export const { setHotel, clearHotel } = hotelSlice.actions;
+export const { setHotelCurrent, clearHotelCurrent } = hotelSlice.actions;
 export default hotelSlice.reducer;

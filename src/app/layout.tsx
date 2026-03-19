@@ -1,3 +1,4 @@
+"use client";
 import { Outfit } from 'next/font/google';
 import './globals.css';
 import "flatpickr/dist/flatpickr.css";

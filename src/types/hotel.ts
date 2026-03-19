@@ -47,4 +47,4 @@ export interface HotelResponse {
   meta: [] | null;
 }
 
-export type HotelFormData = Omit<Hotel, "id" | "created_at" | "updated_at">;
+export type HotelFormData = Omit<Hotel, "ulid" | "created_at" | "updated_at">;

@@ -1,8 +1,8 @@
 "use client";
 import { Hotel } from "@/types/hotel";
 import { useAppDispatch } from "@/store/hooks";
-import { setHotel } from "@/store/slices/hotelSlice";
-import { useRouter } from "next/navigation";interface PropertyCardProps {
+import { setHotelCurrent } from "@/store/slices/hotelSlice";
+import { useRouter } from "next/navigation"; interface PropertyCardProps {
   hotel: Hotel;
 }
 
@@ -11,7 +11,7 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
   const router = useRouter();
 
   const handleEnterDashboard = () => {
-    dispatch(setHotel(hotel));
+    dispatch(setHotelCurrent(hotel));
     router.push("/");
   };
 
@@ -45,10 +45,10 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
           </div>
           <div className="flex flex-col">
             <span className="text-slate-400 !text-[10px] uppercase font-bold tracking-widest">Website</span>
-            <a 
-              href={hotel?.contact?.website?.startsWith('http') ? hotel.contact.website : `https://${hotel?.contact?.website}`} 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href={hotel?.contact?.website?.startsWith('http') ? hotel.contact.website : `https://${hotel?.contact?.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-slate-900 dark:text-white font-bold text-[12px] truncate max-w-[200px] block hover:text-[#ec5b13] dark:hover:text-[#ec5b13] transition-colors"
             >
               {hotel?.contact?.website || '—'}
@@ -62,7 +62,7 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={handleEnterDashboard}
           className="w-full h-12 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
         >

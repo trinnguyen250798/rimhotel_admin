@@ -15,17 +15,15 @@ interface HotelFormProps {
 }
 
 export default function HotelForm({ initialData, onSubmit, isSubmitting, errors }: HotelFormProps) {
-  const isEdit = !!initialData?.id;
+  const isEdit = !!initialData?.ulid;
 
   const getFieldError = (fieldName: string) => {
     return errors && errors[fieldName] ? errors[fieldName][0] : undefined;
   };
 
   const [formData, setFormData] = useState<HotelFormData>({
-    hotel_name: initialData?.hotel_name || "",
-    city: initialData?.city || "",
-    district: initialData?.district || "",
-    ward: initialData?.ward || "",
+    name: initialData?.name || "",
+    address: initialData?.address || "",
     website: initialData?.website || "",
     star_rating: initialData?.star_rating || 0,
     latitude: initialData?.latitude || "",
