@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/auth";
 import { log } from "console";
+import { useEffect } from "react";
+import { fetchCountries, fetchProvincesByCountry } from "@/store/slices/locationSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 interface AuthContextType {
   user: User | null;
@@ -16,6 +19,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(fetchCountries());
+    dispatch(fetchProvincesByCountry('VN'));
+  }, []);
   const router = useRouter();
 
   // Load user từ storage khi F5

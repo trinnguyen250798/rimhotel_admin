@@ -36,7 +36,7 @@ export interface Hotel {
     website: string;
   };
   images: string[] | null;
-  status: boolean;
+  status: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -47,4 +47,28 @@ export interface HotelResponse {
   meta: [] | null;
 }
 
-export type HotelFormData = Omit<Hotel, "ulid" | "created_at" | "updated_at">;
+export interface HotelFormData {
+  ulid: string | null;
+  name: string;
+  description: string;
+  address: string;
+
+  district_code: string;
+  province_code: string;
+  country_code: string;
+
+  latitude: string;   // hoặc number nếu bệ hạ parse trước
+  longitude: string;  // idem
+
+  star_rating: number;
+
+  checkin_time: string;   // format "HH:mm:ss"
+  checkout_time: string;  // format "HH:mm:ss"
+
+  phone: string;
+  email: string;
+  website: string;
+
+  status: number; // 1 | 0 nếu muốn strict hơn
+}
+

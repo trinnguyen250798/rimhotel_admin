@@ -6,6 +6,10 @@ import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import TextArea from "@/components/form/input/TextArea";
 import { Hotel, HotelFormData } from "@/types/hotel";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import Select from "@/components/form/Select";
+import ReactSelect from "react-select"; 
 
 interface HotelFormProps {
   initialData?: Partial<Hotel>;
@@ -13,6 +17,7 @@ interface HotelFormProps {
   isSubmitting?: boolean;
   errors?: Record<string, string[]>;
 }
+
 
 export default function HotelForm({ initialData, onSubmit, isSubmitting, errors }: HotelFormProps) {
   const isEdit = !!initialData?.ulid;
@@ -22,23 +27,22 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
   };
 
   const [formData, setFormData] = useState<HotelFormData>({
+    ulid: initialData?.ulid || null,
     name: initialData?.name || "",
-    address: initialData?.address || "",
-    website: initialData?.website || "",
-    star_rating: initialData?.star_rating || 0,
-    latitude: initialData?.latitude || "",
-    longitude: initialData?.longitude || "",
-    google_map_url: initialData?.google_map_url || "",
-    distance_to_center: initialData?.distance_to_center || 0,
-    company_name: initialData?.company_name || "",
-    tax_code: initialData?.tax_code || "",
-    license_no: initialData?.license_no || "",
-    checkin_time: initialData?.checkin_time || "14:00",
-    checkout_time: initialData?.checkout_time || "12:00",
     description: initialData?.description || "",
-    amenities: initialData?.amenities || "",
-    policies: initialData?.policies || "",
-    languages: initialData?.languages || "",
+    address: initialData?.address?.address || "",
+    district_code: initialData?.address?.district?.code || "",
+    province_code: initialData?.address?.province?.code || "",
+    country_code: initialData?.address?.country?.code || "",
+    latitude: initialData?.location?.lat || "",
+    longitude: initialData?.location?.lng || "",
+    star_rating: initialData?.star_rating || 0,
+    checkin_time: initialData?.checkin_time || "",
+    checkout_time: initialData?.checkout_time || "",
+    phone: initialData?.contact?.phone || "",
+    email: initialData?.contact?.email || "",
+    website: initialData?.contact?.website || "",
+    status: initialData?.status || 1,
   });
 
   const handleChange = (name: string, value: string | number) => {
@@ -58,6 +62,8 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     onSubmit(formData);
   };
 
+ const countries =  useSelector((state: RootState) => state.location.countries);
+ const [province, setProvince] = useState(useSelector((state: RootState) => state.location.provinces));
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* General Information */}
@@ -70,10 +76,10 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               id="hotel_name"
               name="hotel_name"
               placeholder="Nhập tên khách sạn"
-              value={formData.hotel_name}
+              value={formData.name}
               onChange={handleInputChange}
-              error={!!getFieldError("hotel_name")}
-              hint={getFieldError("hotel_name")}
+              error={!!getFieldError("name")}
+              hint={getFieldError("name")}
             />
           </div>
 
@@ -113,40 +119,59 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Vị trí</h3>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div className="col-span-1">
+            <Label htmlFor="country_id">Quốc gia</Label>
+            <Select
+              id="country_code"
+              name="country_code"
+              options={countries.map((country) => ({
+                value: String(country.code),
+                label: country.name,
+              }))}
+              value={formData.country_code || 'VN'}
+              onChange={(value) => {
+                getProvincesByCountry(value);
+                handleInputChange;
+              }}
+              placeholder="Chọn quốc gia"
+              error={!!getFieldError("country_code")}
+              hint={getFieldError("country_code")}
+            />
+          </div>
           <div className="col-span-1">
             <Label htmlFor="city">Thành phố / Tỉnh</Label>
             <Input
               id="city"
-              name="city"
+              name="province_code"
               placeholder="Nhập tên thành phố"
-              value={formData.city}
+              value={formData.province_code} 
               onChange={handleInputChange}
-              error={!!getFieldError("city")}
-              hint={getFieldError("city")}
+              error={!!getFieldError("province_code")}
+              hint={getFieldError("province_code")}
             />
           </div>
           <div className="col-span-1">
             <Label htmlFor="district">Quận / Huyện</Label>
             <Input
               id="district"
-              name="district"
+              name="district_code"
               placeholder="Nhập tên quận/huyện"
-              value={formData.district}
+              value={formData.district_code}
               onChange={handleInputChange}
-              error={!!getFieldError("district")}
-              hint={getFieldError("district")}
+              error={!!getFieldError("district_code")}
+              hint={getFieldError("district_code")}
             />
           </div>
           <div className="col-span-1">
-            <Label htmlFor="ward">Phường / Xã</Label>
+            <Label htmlFor="address">Địa chỉ</Label>
             <Input
-              id="ward"
-              name="ward"
-              placeholder="Nhập tên phường/xã"
-              value={formData.ward}
+              id="address"
+              name="address"
+              placeholder="Nhập địa chỉ"
+              value={formData.address}
               onChange={handleInputChange}
-              error={!!getFieldError("ward")}
-              hint={getFieldError("ward")}
+              error={!!getFieldError("address")}
+              hint={getFieldError("address")}
             />
           </div>
         </div>
@@ -158,7 +183,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               id="google_map_url"
               name="google_map_url"
               placeholder="Dán liên kết Google Maps"
-              value={formData.google_map_url}
+              value=""
               onChange={handleInputChange}
               error={!!getFieldError("google_map_url")}
               hint={getFieldError("google_map_url")}
@@ -172,7 +197,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               name="distance_to_center"
               step={0.1}
               placeholder="vd: 2.5"
-              value={formData.distance_to_center}
+              value=""
               onChange={handleInputChange}
             />
           </div>
@@ -214,7 +239,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               id="company_name"
               name="company_name"
               placeholder="Nhập tên công ty"
-              value={formData.company_name}
+              value=""
               onChange={handleInputChange}
               error={!!getFieldError("company_name")}
               hint={getFieldError("company_name")}
@@ -226,7 +251,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               id="tax_code"
               name="tax_code"
               placeholder="Nhập mã số thuế"
-              value={formData.tax_code}
+              value=""
               onChange={handleInputChange}
               error={!!getFieldError("tax_code")}
               hint={getFieldError("tax_code")}
@@ -238,7 +263,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               id="license_no"
               name="license_no"
               placeholder="Nhập số giấy phép"
-              value={formData.license_no}
+              value=""
               onChange={handleInputChange}
               error={!!getFieldError("license_no")}
               hint={getFieldError("license_no")}
@@ -290,7 +315,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
           <Label htmlFor="policies">Chính sách</Label>
           <TextArea
             placeholder="Nhập các chính sách của khách sạn"
-            value={formData.policies}
+            value=""
             onChange={(value) => handleChange("policies", value)}
             rows={4}
             error={!!getFieldError("policies")}
@@ -302,7 +327,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
             <Label htmlFor="amenities">Tiện nghi (Chuỗi JSON hoặc phân tách bằng dấu phẩy)</Label>
             <TextArea
               placeholder='vd: ["Wifi", "Pool", "Parking"]'
-              value={formData.amenities}
+              value=""
               onChange={(value) => handleChange("amenities", value)}
               rows={2}
             />
@@ -311,7 +336,7 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
             <Label htmlFor="languages">Ngôn ngữ (Chuỗi JSON hoặc phân tách bằng dấu phẩy)</Label>
             <TextArea
               placeholder='vd: ["Vietnamese", "English"]'
-              value={formData.languages}
+              value=""
               onChange={(value) => handleChange("languages", value)}
               rows={2}
             />
