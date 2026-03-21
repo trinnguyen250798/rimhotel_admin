@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
@@ -10,6 +10,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Select from "@/components/form/Select";
 import ReactSelect from "react-select"; 
+import { fetchProvincesByCountry, fetchDistrictsByProvince } from "@/store/slices/locationSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { Country, Province, District } from "@/types/location";
+// import AddressAutocomplete from "@/components/map/locationiq";
 
 interface HotelFormProps {
   initialData?: Partial<Hotel>;
@@ -20,6 +24,15 @@ interface HotelFormProps {
 
 
 export default function HotelForm({ initialData, onSubmit, isSubmitting, errors }: HotelFormProps) {
+    const dispatch = useAppDispatch();
+    const countries = useSelector((state: RootState) => state.location.countries);
+    const provincesState = useSelector((state: RootState) => state.location.provinces);
+    const districtsState = useSelector((state: RootState) => state.location.districts);
+    const [country, setCountry] = useState<Country[]>([]);
+    const [province, setProvince] = useState<Province[]>([]);
+    const [district, setDistrict] = useState<District[]>([]);
+
+
   const isEdit = !!initialData?.ulid;
 
   const getFieldError = (fieldName: string) => {
@@ -62,8 +75,33 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     onSubmit(formData);
   };
 
- const countries =  useSelector((state: RootState) => state.location.countries);
- const [province, setProvince] = useState(useSelector((state: RootState) => state.location.provinces));
+  useEffect(() => {
+    if (formData.country_code) {
+      const data = provincesState[formData.country_code];
+      if (data) {
+        setProvince(data);
+      } else {
+        dispatch(fetchProvincesByCountry(formData.country_code));
+      }
+    } else {
+      setProvince([]);
+    }
+  }, [formData.country_code, provincesState, dispatch]);
+
+  useEffect(() => {
+    if (formData.province_code) {
+      const data = districtsState[formData.province_code];
+      if (data) {
+        setDistrict(data);
+      } else {
+        dispatch(fetchDistrictsByProvince(formData.province_code));
+      }
+    } else {
+      setDistrict([]);
+    }
+  }, [formData.province_code, districtsState, dispatch]);
+
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* General Information */}
@@ -71,10 +109,10 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Thông tin chung</h3>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="col-span-1">
-            <Label htmlFor="hotel_name">Tên khách sạn</Label>
+            <Label htmlFor="name">Tên khách sạn</Label>
             <Input
-              id="hotel_name"
-              name="hotel_name"
+              id="name"
+              name="name"
               placeholder="Nhập tên khách sạn"
               value={formData.name}
               onChange={handleInputChange}
@@ -120,44 +158,58 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Vị trí</h3>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <div className="col-span-1">
-            <Label htmlFor="country_id">Quốc gia</Label>
-            <Select
-              id="country_code"
-              name="country_code"
-              options={countries.map((country) => ({
-                value: String(country.code),
-                label: country.name,
-              }))}
-              value={formData.country_code || 'VN'}
-              onChange={(value) => {
-                getProvincesByCountry(value);
-                handleInputChange;
-              }}
-              placeholder="Chọn quốc gia"
-              error={!!getFieldError("country_code")}
-              hint={getFieldError("country_code")}
-            />
+            <Label htmlFor="country_code">Quốc gia</Label>
+           <Select
+                id="country_code"
+                name="country_code"
+                options={countries.map((country) => ({
+                    value: String(country.code),
+                    label: country.name,
+                }))}
+                value={formData.country_code || ""}
+                onChange={(value) => {
+                    handleChange("country_code", String(value));
+                    handleChange("province_code", "");
+                    handleChange("district_code", "");
+                }}
+                placeholder="Chọn quốc gia"
+                error={!!getFieldError("country_code")}
+                hint={getFieldError("country_code")}
+                />
           </div>
           <div className="col-span-1">
-            <Label htmlFor="city">Thành phố / Tỉnh</Label>
-            <Input
-              id="city"
+            <Label htmlFor="province_code">Thành phố / Tỉnh</Label>
+             <Select
+              id="province_code"
               name="province_code"
-              placeholder="Nhập tên thành phố"
-              value={formData.province_code} 
-              onChange={handleInputChange}
+              options={province.map((p) => ({
+                value: String(p.code),
+                label: p.name,   
+              }))}
+              value={formData.province_code || ""}
+              onChange={(value) => {
+                handleChange("province_code", String(value));
+                handleChange("district_code", "");
+              }}
+              placeholder="Chọn thành phố / tỉnh"
               error={!!getFieldError("province_code")}
               hint={getFieldError("province_code")}
             />
           </div>
           <div className="col-span-1">
-            <Label htmlFor="district">Quận / Huyện</Label>
-            <Input
-              id="district"
+            <Label htmlFor="district_code">Quận / Huyện</Label>
+            <Select
+              id="district_code"
               name="district_code"
-              placeholder="Nhập tên quận/huyện"
-              value={formData.district_code}
-              onChange={handleInputChange}
+              options={district.map((d) => ({
+                value: String(d.code),
+                label: d.name,   
+              }))}
+              value={formData.district_code || ""}
+              onChange={(value) => {
+                  handleChange("district_code", String(value));
+              }}
+              placeholder="Chọn quận / huyện"
               error={!!getFieldError("district_code")}
               hint={getFieldError("district_code")}
             />
@@ -177,6 +229,13 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            {/* <AddressAutocomplete
+  onSelect={({ address, lat, lng }) => {
+    handleChange("address", address);
+    handleChange("latitude", String(lat));
+    handleChange("longitude", String(lng));
+  }}
+/> */}
           <div className="col-span-1">
             <Label htmlFor="google_map_url">Đường dẫn Google Maps</Label>
             <Input

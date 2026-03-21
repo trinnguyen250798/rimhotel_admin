@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useId, useState, useEffect } from "react";
 import ReactSelect, { Props as ReactSelectProps } from "react-select";
 
 export interface Option {
@@ -8,7 +8,7 @@ export interface Option {
 
 interface SelectProps extends Omit<ReactSelectProps, 'value' | 'onChange' | 'options'> {
   options: Option[];
-  value?: string | number | null;
+  value?: string | number;
   onChange?: (value: string | number | null) => void;
   error?: boolean;
   hint?: string;
@@ -27,6 +27,13 @@ const Select = forwardRef<any, SelectProps>(({
   className = "",
   ...props
 }, ref) => {
+  const reactSelectId = useId();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const selectedOption = options.find((opt) => opt.value === value) || null;
 
   const handleChange = (selected: any) => {
@@ -36,10 +43,24 @@ const Select = forwardRef<any, SelectProps>(({
     }
   };
 
+  if (!isMounted) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className="flex h-11 w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 dark:bg-gray-900 dark:border-gray-700"></div>
+        {hint && (
+          <p className={`mt-1.5 text-xs ${error ? "text-error-500" : "text-gray-500"}`}>
+            {hint}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${className}`}>
       <ReactSelect
         ref={ref}
+        instanceId={props.id || reactSelectId}
         value={selectedOption}
         onChange={handleChange}
         options={options}

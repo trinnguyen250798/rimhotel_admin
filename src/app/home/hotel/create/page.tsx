@@ -17,7 +17,7 @@ export default function HotelCreatePage() {
       await createHotel(data);
       // Wait a bit to show success message before redirecting
       setTimeout(() => {
-        router.push("/hotel");
+        router.push("/home");
       }, 2000);
     } catch (err) {
       // Error is handled in the hook
