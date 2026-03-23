@@ -11,6 +11,7 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
   const router = useRouter();
 
   const handleEnterDashboard = () => {
+    localStorage.setItem("hotelIdCurrent", hotel.ulid);
     dispatch(setHotelCurrent(hotel));
     router.push("/");
   };
@@ -28,12 +29,13 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
 
       <div className="p-6 flex flex-col flex-1">
         <div className="flex justify-between items-start mb-4">
-          <div className="flex gap-3">
+          <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">{hotel?.name}</h3>
             <span className="bg-[#ec5b13]/10 text-[#ec5b13] px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
-              {hotel?.address.district.name}
+              {hotel?.address.province.name}
             </span>
           </div>
+
         </div>
         <p className="text-slate-500 text-xs flex items-center gap-1 mb-2">
           <span className="!text-[18px] material-symbols-outlined ">location_on</span> {hotel?.address.address}

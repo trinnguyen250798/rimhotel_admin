@@ -7,7 +7,7 @@ export const HotelService = {
 
     return response.data;
   },
-  getById: async (id: number): Promise<Hotel> => {
+  getById: async (id: string | number): Promise<Hotel> => {
     const response = await axiosClient.get(`/admin/hotels/${id}`);
     return response.data;
   },
