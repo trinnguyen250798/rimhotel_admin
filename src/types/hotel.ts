@@ -1,44 +1,64 @@
+export interface Amenity {
+  id: number;
+  name: string;
+  icon: string;
+}
+
 export interface Hotel {
-  ulid: string;                // thay id
+  ulid: string;
   name: string;
   slug: string;
+  subdomain: string | null;
   description: string | null;
-  address: {
-    address: string;
-    district: {
-      id: string;
-      code: string;
-      name: string;
-      province_code: string;
-    };
-    province: {
-      id: string;
-      code: string;
-      name: string;
-      country_code: string;
-    };
-    country: {
-      id: string;
-      code: string;
-      name: string;
-    };
-  };
-  location: {
-    lat: string;
-    lng: string;
-  };
+  short_description: string | null;
+  address: string | null;
+  district: {
+    id: string;
+    code: string;
+    name: string;
+    province_code: string;
+  } | null;
+  province: {
+    id: string;
+    code: string;
+    name: string;
+    country_code: string;
+  } | null;
+  country: {
+    id: string;
+    code: string;
+    name: string;
+  } | null;
+  latitude: string | null;
+  longitude: string | null;
   star_rating: number;
   checkin_time: string;
   checkout_time: string;
-  contact: {
-    phone: string;
-    email: string;
-    website: string;
-  };
+  phone: string | null;
+  email: string | null;
+  website: string | null;
   images: string[] | null;
-  status: number;
-  created_at?: string;
-  updated_at?: string;
+  total_images: number;
+  status: boolean;
+  rating_avg: number | null;
+  rating_count: number | null;
+  price_from: number | null;
+  price_to: number | null;
+  is_refundable: boolean;
+  is_free_cancellation: boolean;
+  checkin_policy: string | null;
+  checkout_policy: string | null;
+  is_featured: boolean;
+  is_top_deal: boolean;
+  booking_count: number;
+  view_count: number;
+  type: string; // nếu bệ hạ có interface riêng cho type có thể replace
+  type_label: string;
+  languages: string[] | null;
+  payment_options: string[] | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  amenities: Amenity[];
 }
 
 export interface HotelResponse {
@@ -69,6 +89,12 @@ export interface HotelFormData {
   email: string;
   website: string;
 
-  status: number; // 1 | 0 nếu muốn strict hơn
+  status: boolean; // 1 | 0 nếu muốn strict hơn
+}
+
+export interface HotelType {
+  id: number;
+  name: string;
+  icon: string;
 }
 

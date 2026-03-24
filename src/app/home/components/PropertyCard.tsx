@@ -5,6 +5,7 @@ import { setHotelCurrent } from "@/store/slices/hotelSlice";
 import { useRouter } from "next/navigation"; interface PropertyCardProps {
   hotel: Hotel;
 }
+import { useEffect } from "react";
 
 export default function PropertyCard({ hotel }: PropertyCardProps) {
   const dispatch = useAppDispatch();
@@ -15,6 +16,11 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
     dispatch(setHotelCurrent(hotel));
     router.push("/");
   };
+
+  useEffect(() => {
+    const hotelType = HotelService.getTypes();
+    console.log(hotelType);
+  }, [hotel]);
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col">
@@ -32,28 +38,28 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">{hotel?.name}</h3>
             <span className="bg-[#ec5b13]/10 text-[#ec5b13] px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
-              {hotel?.address.province.name}
+              {hotel?.province?.name}
             </span>
           </div>
 
         </div>
         <p className="text-slate-500 text-xs flex items-center gap-1 mb-2">
-          <span className="!text-[18px] material-symbols-outlined ">location_on</span> {hotel?.address.address}
+          <span className="!text-[18px] material-symbols-outlined ">location_on</span> {hotel?.address}
         </p>
         <div className="grid grid-cols-3 gap-4 py-4 border-y border-slate-100 dark:border-slate-800 mb-6">
           <div className="flex flex-col">
             <span className="text-slate-400 !text-[10px] uppercase font-bold tracking-widest">District</span>
-            <span className="text-slate-900 dark:text-white font-bold text-[12px]">{hotel?.address.district.name}</span>
+            <span className="text-slate-900 dark:text-white font-bold text-[12px]">{hotel?.district?.name}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-slate-400 !text-[10px] uppercase font-bold tracking-widest">Website</span>
             <a
-              href={hotel?.contact?.website?.startsWith('http') ? hotel.contact.website : `https://${hotel?.contact?.website}`}
+              href={hotel?.website?.startsWith('http') ? hotel.website : `https://${hotel?.website}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-900 dark:text-white font-bold text-[12px] truncate max-w-[200px] block hover:text-[#ec5b13] dark:hover:text-[#ec5b13] transition-colors"
             >
-              {hotel?.contact?.website || '—'}
+              {hotel?.website || '—'}
             </a>
           </div>
           <div className="flex flex-col">

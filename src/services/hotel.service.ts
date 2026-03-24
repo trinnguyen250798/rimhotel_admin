@@ -1,5 +1,5 @@
 import axiosClient from "@/lib/axios";
-import { Hotel, HotelFormData, HotelResponse } from "@/types/hotel";
+import { Hotel, HotelFormData, HotelResponse, HotelType, Amenity } from "@/types/hotel";
 
 export const HotelService = {
   getAll: async (): Promise<HotelResponse> => {
@@ -21,5 +21,15 @@ export const HotelService = {
   },
   delete: async (id: number): Promise<void> => {
     await axiosClient.delete(`/admin/hotels/${id}`);
+  },
+
+  getTypes: async (): Promise<HotelType[]> => {
+    const response = await axiosClient.get("/getType");
+    return response.data;
+  },
+
+  getAmenities: async (): Promise<Amenity[]> => {
+    const response = await axiosClient.get("/getAmenities");
+    return response.data;
   },
 };
