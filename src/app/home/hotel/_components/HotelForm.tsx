@@ -13,6 +13,7 @@ import ReactSelect from "react-select";
 import { fetchProvincesByCountry, fetchDistrictsByProvince } from "@/store/slices/locationSlice";
 import { useAppDispatch } from "@/store/hooks";
 import { Country, Province, District } from "@/types/location";
+import { HotelService } from "@/services/hotel.service";
 // import AddressAutocomplete from "@/components/map/locationiq";
 
 interface HotelFormProps {
@@ -101,6 +102,11 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     }
   }, [formData.province_code, districtsState, dispatch]);
 
+
+    useEffect(() => {
+    const hotelType = async () => await HotelService.getTypes();    
+    console.log(hotelType);
+  }, [hotel]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">

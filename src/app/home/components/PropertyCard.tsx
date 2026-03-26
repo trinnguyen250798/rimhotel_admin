@@ -2,10 +2,10 @@
 import { Hotel } from "@/types/hotel";
 import { useAppDispatch } from "@/store/hooks";
 import { setHotelCurrent } from "@/store/slices/hotelSlice";
-import { useRouter } from "next/navigation"; interface PropertyCardProps {
+import { useRouter } from "next/navigation";
+interface PropertyCardProps {
   hotel: Hotel;
 }
-import { useEffect } from "react";
 
 export default function PropertyCard({ hotel }: PropertyCardProps) {
   const dispatch = useAppDispatch();
@@ -17,10 +17,7 @@ export default function PropertyCard({ hotel }: PropertyCardProps) {
     router.push("/");
   };
 
-  useEffect(() => {
-    const hotelType = HotelService.getTypes();
-    console.log(hotelType);
-  }, [hotel]);
+
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow flex flex-col">
