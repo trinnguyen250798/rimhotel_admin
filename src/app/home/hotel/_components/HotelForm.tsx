@@ -9,12 +9,10 @@ import { Hotel, HotelFormData } from "@/types/hotel";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Select from "@/components/form/Select";
-import ReactSelect from "react-select"; 
 import { fetchProvincesByCountry, fetchDistrictsByProvince } from "@/store/slices/locationSlice";
+import GoongAddress from "@/components/map/goong";
 import { useAppDispatch } from "@/store/hooks";
 import { Country, Province, District } from "@/types/location";
-import { HotelService } from "@/services/hotel.service";
-// import AddressAutocomplete from "@/components/map/locationiq";
 
 interface HotelFormProps {
   initialData?: Partial<Hotel>;
@@ -23,16 +21,13 @@ interface HotelFormProps {
   errors?: Record<string, string[]>;
 }
 
-
 export default function HotelForm({ initialData, onSubmit, isSubmitting, errors }: HotelFormProps) {
-    const dispatch = useAppDispatch();
-    const countries = useSelector((state: RootState) => state.location.countries);
-    const provincesState = useSelector((state: RootState) => state.location.provinces);
-    const districtsState = useSelector((state: RootState) => state.location.districts);
-    const [country, setCountry] = useState<Country[]>([]);
-    const [province, setProvince] = useState<Province[]>([]);
-    const [district, setDistrict] = useState<District[]>([]);
-
+  const dispatch = useAppDispatch();
+  const countries = useSelector((state: RootState) => state.location.countries);
+  const provincesState = useSelector((state: RootState) => state.location.provinces);
+  const districtsState = useSelector((state: RootState) => state.location.districts);
+  const [province, setProvince] = useState<Province[]>([]);
+  const [district, setDistrict] = useState<District[]>([]);
 
   const isEdit = !!initialData?.ulid;
 
@@ -42,24 +37,60 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
 
   const [formData, setFormData] = useState<HotelFormData>({
     ulid: initialData?.ulid || null,
+
+    // Required
     name: initialData?.name || "",
-    description: initialData?.description || "",
     address: initialData?.address || "",
-    district_code: initialData?.district?.code || "",
     province_code: initialData?.province?.code || "",
     country_code: initialData?.country?.code || "",
+
+    // Nullable location
+    district_code: initialData?.district?.code || "",
     latitude: initialData?.latitude || "",
     longitude: initialData?.longitude || "",
-    star_rating: initialData?.star_rating || 0,
+
+
+    // General info
+    star_rating: initialData?.star_rating ?? null,
     checkin_time: initialData?.checkin_time || "",
     checkout_time: initialData?.checkout_time || "",
     phone: initialData?.phone || "",
     email: initialData?.email || "",
     website: initialData?.website || "",
-    status: initialData?.status || true,
+    status: initialData?.status !== undefined ? (initialData.status ? 1 : 0) : 1,
+
+    type: initialData?.type || "",
+
+    // Description & SEO
+    short_description: initialData?.short_description || "",
+    meta_title: initialData?.meta_title || "",
+    meta_description: initialData?.meta_description || "",
+
+    // Policies
+    checkin_policy: initialData?.checkin_policy || "",
+    checkout_policy: initialData?.checkout_policy || "",
+
+    // Stats
+    rating_avg: initialData?.rating_avg ?? null,
+    rating_count: initialData?.rating_count ?? null,
+    price_from: initialData?.price_from ?? null,
+    price_to: initialData?.price_to ?? null,
+    total_images: initialData?.total_images ?? null,
+    booking_count: initialData?.booking_count ?? null,
+    view_count: initialData?.view_count ?? null,
+
+    // Flags
+    is_refundable: initialData?.is_refundable ?? false,
+    is_free_cancellation: initialData?.is_free_cancellation ?? false,
+    is_featured: initialData?.is_featured ?? false,
+    is_top_deal: initialData?.is_top_deal ?? false,
+
+    // Arrays
+    languages: initialData?.languages || [],
+    payment_options: initialData?.payment_options || [],
   });
 
-  const handleChange = (name: string, value: string | number) => {
+  const handleChange = (name: string, value: string | number | boolean | null | string[]) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -68,7 +99,13 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    handleChange(name, type === "number" ? Number(value) : value);
+    if (type === "checkbox") {
+      handleChange(name, (e.target as HTMLInputElement).checked);
+    } else if (type === "number") {
+      handleChange(name, value === "" ? null : Number(value));
+    } else {
+      handleChange(name, value);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,20 +139,16 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     }
   }, [formData.province_code, districtsState, dispatch]);
 
-
-    useEffect(() => {
-    const hotelType = async () => await HotelService.getTypes();    
-    console.log(hotelType);
-  }, [hotel]);
-
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {/* General Information */}
+
+      {/* ── General Information ── */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Thông tin chung</h3>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
           <div className="col-span-1">
-            <Label htmlFor="name">Tên khách sạn</Label>
+            <Label htmlFor="name">Tên khách sạn <span className="text-red-500">*</span></Label>
             <Input
               id="name"
               name="name"
@@ -128,6 +161,19 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
           </div>
 
           <div className="col-span-1">
+            <Label htmlFor="type">Loại khách sạn</Label>
+            <Input
+              id="type"
+              name="type"
+              placeholder="vd: hotel, resort, hostel..."
+              value={formData.type}
+              onChange={handleInputChange}
+              error={!!getFieldError("type")}
+              hint={getFieldError("type")}
+            />
+          </div>
+
+          <div className="col-span-1">
             <Label htmlFor="star_rating">Xếp hạng sao (0-5)</Label>
             <Input
               type="number"
@@ -135,10 +181,37 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               name="star_rating"
               min="0"
               max="5"
-              value={formData.star_rating}
+              value={formData.star_rating ?? ""}
               onChange={handleInputChange}
               error={!!getFieldError("star_rating")}
               hint={getFieldError("star_rating")}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label htmlFor="phone">Số điện thoại</Label>
+            <Input
+              id="phone"
+              name="phone"
+              placeholder="Nhập số điện thoại"
+              value={formData.phone}
+              onChange={handleInputChange}
+              error={!!getFieldError("phone")}
+              hint={getFieldError("phone")}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Nhập email"
+              value={formData.email}
+              onChange={handleInputChange}
+              error={!!getFieldError("email")}
+              hint={getFieldError("email")}
             />
           </div>
 
@@ -154,44 +227,58 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               hint={getFieldError("website")}
             />
           </div>
+
+          <div className="col-span-1">
+            <Label htmlFor="status">Trạng thái</Label>
+            <Select
+              id="status"
+              name="status"
+              options={[
+                { value: "1", label: "Hoạt động" },
+                { value: "0", label: "Tạm dừng" },
+              ]}
+              value={String(formData.status)}
+              onChange={(value) => handleChange("status", Number(value) as 0 | 1)}
+              placeholder="Chọn trạng thái"
+              error={!!getFieldError("status")}
+              hint={getFieldError("status")}
+            />
+          </div>
+
         </div>
       </div>
 
       <hr className="border-gray-200 dark:border-white/[0.05]" />
 
-      {/* Location Information */}
+      {/* ── Location ── */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Vị trí</h3>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <div className="col-span-1">
-            <Label htmlFor="country_code">Quốc gia</Label>
-           <Select
-                id="country_code"
-                name="country_code"
-                options={countries.map((country) => ({
-                    value: String(country.code),
-                    label: country.name,
-                }))}
-                value={formData.country_code || ""}
-                onChange={(value) => {
-                    handleChange("country_code", String(value));
-                    handleChange("province_code", "");
-                    handleChange("district_code", "");
-                }}
-                placeholder="Chọn quốc gia"
-                error={!!getFieldError("country_code")}
-                hint={getFieldError("country_code")}
-                />
-          </div>
+
           <div className="col-span-1">
-            <Label htmlFor="province_code">Thành phố / Tỉnh</Label>
-             <Select
+            <Label htmlFor="country_code">Quốc gia <span className="text-red-500">*</span></Label>
+            <Select
+              id="country_code"
+              name="country_code"
+              options={countries.map((c) => ({ value: String(c.code), label: c.name }))}
+              value={formData.country_code || ""}
+              onChange={(value) => {
+                handleChange("country_code", String(value));
+                handleChange("province_code", "");
+                handleChange("district_code", "");
+              }}
+              placeholder="Chọn quốc gia"
+              error={!!getFieldError("country_code")}
+              hint={getFieldError("country_code")}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label htmlFor="province_code">Thành phố / Tỉnh <span className="text-red-500">*</span></Label>
+            <Select
               id="province_code"
               name="province_code"
-              options={province.map((p) => ({
-                value: String(p.code),
-                label: p.name,   
-              }))}
+              options={province.map((p) => ({ value: String(p.code), label: p.name }))}
               value={formData.province_code || ""}
               onChange={(value) => {
                 handleChange("province_code", String(value));
@@ -202,141 +289,76 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               hint={getFieldError("province_code")}
             />
           </div>
+
           <div className="col-span-1">
             <Label htmlFor="district_code">Quận / Huyện</Label>
             <Select
               id="district_code"
               name="district_code"
-              options={district.map((d) => ({
-                value: String(d.code),
-                label: d.name,   
-              }))}
+              options={district.map((d) => ({ value: String(d.code), label: d.name }))}
               value={formData.district_code || ""}
-              onChange={(value) => {
-                  handleChange("district_code", String(value));
-              }}
+              onChange={(value) => handleChange("district_code", String(value))}
               placeholder="Chọn quận / huyện"
               error={!!getFieldError("district_code")}
               hint={getFieldError("district_code")}
             />
           </div>
-          <div className="col-span-1">
-            <Label htmlFor="address">Địa chỉ</Label>
-            <Input
-              id="address"
-              name="address"
-              placeholder="Nhập địa chỉ"
-              value={formData.address}
-              onChange={handleInputChange}
-              error={!!getFieldError("address")}
-              hint={getFieldError("address")}
+
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+
+          <div>
+            <Label htmlFor="address">Địa chỉ <span className="text-red-500">*</span></Label>
+            <GoongAddress
+              onSelect={({ address, lat, lng }) => {
+                handleChange("address", address);
+                handleChange("latitude", String(lat));
+                handleChange("longitude", String(lng));
+              }}
             />
+            {getFieldError("address") && (
+              <p className="mt-1 text-sm text-red-500">{getFieldError("address")}</p>
+            )}
           </div>
+
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-            {/* <AddressAutocomplete
-  onSelect={({ address, lat, lng }) => {
-    handleChange("address", address);
-    handleChange("latitude", String(lat));
-    handleChange("longitude", String(lng));
-  }}
-/> */}
-          <div className="col-span-1">
-            <Label htmlFor="google_map_url">Đường dẫn Google Maps</Label>
-            <Input
-              id="google_map_url"
-              name="google_map_url"
-              placeholder="Dán liên kết Google Maps"
-              value=""
-              onChange={handleInputChange}
-              error={!!getFieldError("google_map_url")}
-              hint={getFieldError("google_map_url")}
-            />
-          </div>
-          <div className="col-span-1">
-            <Label htmlFor="distance_to_center">Khoảng cách đến trung tâm (km)</Label>
-            <Input
-              type="number"
-              id="distance_to_center"
-              name="distance_to_center"
-              step={0.1}
-              placeholder="vd: 2.5"
-              value=""
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div className="col-span-1">
             <Label htmlFor="latitude">Vĩ độ</Label>
             <Input
               id="latitude"
               name="latitude"
-              placeholder="vd: 10.762622"
+              placeholder="Tự động từ địa chỉ"
               value={formData.latitude}
               onChange={handleInputChange}
+              hint={formData.latitude ? undefined : "Chọn địa chỉ để tự động điền"}
             />
           </div>
+
           <div className="col-span-1">
             <Label htmlFor="longitude">Kinh độ</Label>
             <Input
               id="longitude"
               name="longitude"
-              placeholder="vd: 106.660172"
+              placeholder="Tự động từ địa chỉ"
               value={formData.longitude}
               onChange={handleInputChange}
             />
           </div>
+
         </div>
       </div>
 
       <hr className="border-gray-200 dark:border-white/[0.05]" />
 
-      {/* Legal & Contact */}
+      {/* ── Check-in / Check-out ── */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Pháp lý & Liên hệ</h3>
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="col-span-1">
-            <Label htmlFor="company_name">Tên công ty</Label>
-            <Input
-              id="company_name"
-              name="company_name"
-              placeholder="Nhập tên công ty"
-              value=""
-              onChange={handleInputChange}
-              error={!!getFieldError("company_name")}
-              hint={getFieldError("company_name")}
-            />
-          </div>
-          <div className="col-span-1">
-            <Label htmlFor="tax_code">Mã số thuế</Label>
-            <Input
-              id="tax_code"
-              name="tax_code"
-              placeholder="Nhập mã số thuế"
-              value=""
-              onChange={handleInputChange}
-              error={!!getFieldError("tax_code")}
-              hint={getFieldError("tax_code")}
-            />
-          </div>
-          <div className="col-span-1">
-            <Label htmlFor="license_no">Số giấy phép kinh doanh</Label>
-            <Input
-              id="license_no"
-              name="license_no"
-              placeholder="Nhập số giấy phép"
-              value=""
-              onChange={handleInputChange}
-              error={!!getFieldError("license_no")}
-              hint={getFieldError("license_no")}
-            />
-          </div>
-        </div>
-
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Giờ nhận & trả phòng</h3>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
           <div className="col-span-1">
             <Label htmlFor="checkin_time">Giờ nhận phòng</Label>
             <Input
@@ -345,8 +367,11 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               name="checkin_time"
               value={formData.checkin_time}
               onChange={handleInputChange}
+              error={!!getFieldError("checkin_time")}
+              hint={getFieldError("checkin_time")}
             />
           </div>
+
           <div className="col-span-1">
             <Label htmlFor="checkout_time">Giờ trả phòng</Label>
             <Input
@@ -355,57 +380,176 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
               name="checkout_time"
               value={formData.checkout_time}
               onChange={handleInputChange}
+              error={!!getFieldError("checkout_time")}
+              hint={getFieldError("checkout_time")}
             />
           </div>
+
         </div>
       </div>
 
       <hr className="border-gray-200 dark:border-white/[0.05]" />
 
-      {/* Content & Policies */}
+      {/* ── Description & SEO ── */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Nội dung & Chính sách</h3>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Mô tả & SEO</h3>
+
         <div>
-          <Label htmlFor="description">Mô tả</Label>
+          <Label htmlFor="short_description">Mô tả ngắn</Label>
           <TextArea
-            placeholder="Nhập mô tả về khách sạn"
-            value={formData.description}
-            onChange={(value) => handleChange("description", value)}
-            rows={4}
-            error={!!getFieldError("description")}
-            hint={getFieldError("description")}
+            placeholder="Nhập mô tả ngắn về khách sạn"
+            value={formData.short_description}
+            onChange={(value) => handleChange("short_description", value)}
+            rows={3}
+            error={!!getFieldError("short_description")}
+            hint={getFieldError("short_description")}
           />
         </div>
-        <div>
-          <Label htmlFor="policies">Chính sách</Label>
-          <TextArea
-            placeholder="Nhập các chính sách của khách sạn"
-            value=""
-            onChange={(value) => handleChange("policies", value)}
-            rows={4}
-            error={!!getFieldError("policies")}
-            hint={getFieldError("policies")}
-          />
-        </div>
+
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
           <div className="col-span-1">
-            <Label htmlFor="amenities">Tiện nghi (Chuỗi JSON hoặc phân tách bằng dấu phẩy)</Label>
-            <TextArea
-              placeholder='vd: ["Wifi", "Pool", "Parking"]'
-              value=""
-              onChange={(value) => handleChange("amenities", value)}
-              rows={2}
+            <Label htmlFor="meta_title">Meta Title</Label>
+            <Input
+              id="meta_title"
+              name="meta_title"
+              placeholder="Nhập meta title"
+              value={formData.meta_title}
+              onChange={handleInputChange}
+              error={!!getFieldError("meta_title")}
+              hint={getFieldError("meta_title")}
             />
           </div>
+
           <div className="col-span-1">
-            <Label htmlFor="languages">Ngôn ngữ (Chuỗi JSON hoặc phân tách bằng dấu phẩy)</Label>
-            <TextArea
-              placeholder='vd: ["Vietnamese", "English"]'
-              value=""
-              onChange={(value) => handleChange("languages", value)}
-              rows={2}
+            <Label htmlFor="meta_description">Meta Description</Label>
+            <Input
+              id="meta_description"
+              name="meta_description"
+              placeholder="Nhập meta description"
+              value={formData.meta_description}
+              onChange={handleInputChange}
+              error={!!getFieldError("meta_description")}
+              hint={getFieldError("meta_description")}
             />
           </div>
+
+        </div>
+      </div>
+
+      <hr className="border-gray-200 dark:border-white/[0.05]" />
+
+      {/* ── Policies ── */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Chính sách</h3>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+          <div className="col-span-1">
+            <Label htmlFor="checkin_policy">Chính sách nhận phòng</Label>
+            <TextArea
+              placeholder="Nhập chính sách nhận phòng"
+              value={formData.checkin_policy}
+              onChange={(value) => handleChange("checkin_policy", value)}
+              rows={3}
+              error={!!getFieldError("checkin_policy")}
+              hint={getFieldError("checkin_policy")}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label htmlFor="checkout_policy">Chính sách trả phòng</Label>
+            <TextArea
+              placeholder="Nhập chính sách trả phòng"
+              value={formData.checkout_policy}
+              onChange={(value) => handleChange("checkout_policy", value)}
+              rows={3}
+              error={!!getFieldError("checkout_policy")}
+              hint={getFieldError("checkout_policy")}
+            />
+          </div>
+
+        </div>
+      </div>
+
+      <hr className="border-gray-200 dark:border-white/[0.05]" />
+
+      {/* ── Flags ── */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Tùy chọn</h3>
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+
+          {(
+            [
+              { name: "is_refundable", label: "Có hoàn tiền" },
+              { name: "is_free_cancellation", label: "Hủy miễn phí" },
+              { name: "is_featured", label: "Nổi bật" },
+              { name: "is_top_deal", label: "Top Deal" },
+            ] as { name: keyof Pick<HotelFormData, "is_refundable" | "is_free_cancellation" | "is_featured" | "is_top_deal">; label: string }[]
+          ).map(({ name, label }) => (
+            <label key={name} className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                name={name}
+                checked={formData[name]}
+                onChange={handleInputChange}
+                className="w-4 h-4 accent-brand-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+            </label>
+          ))}
+
+        </div>
+      </div>
+
+      <hr className="border-gray-200 dark:border-white/[0.05]" />
+
+      {/* ── Languages & Payment ── */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Ngôn ngữ & Thanh toán</h3>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+          <div className="col-span-1">
+            <Label htmlFor="languages">Ngôn ngữ hỗ trợ (phân cách bằng dấu phẩy)</Label>
+            <Input
+              id="languages"
+              name="languages"
+              placeholder='vd: Vietnamese, English'
+              value={formData.languages.join(", ")}
+              onChange={(e) =>
+                handleChange(
+                  "languages",
+                  e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                )
+              }
+              error={!!getFieldError("languages")}
+              hint={getFieldError("languages")}
+            />
+          </div>
+
+          <div className="col-span-1">
+            <Label htmlFor="payment_options">Phương thức thanh toán (phân cách bằng dấu phẩy)</Label>
+            <Input
+              id="payment_options"
+              name="payment_options"
+              placeholder='vd: Cash, Credit Card, Momo'
+              value={formData.payment_options.join(", ")}
+              onChange={(e) =>
+                handleChange(
+                  "payment_options",
+                  e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                )
+              }
+              error={!!getFieldError("payment_options")}
+              hint={getFieldError("payment_options")}
+            />
+          </div>
+
         </div>
       </div>
 
@@ -414,9 +558,12 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
           Hủy
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (isEdit ? "Đang cập nhật..." : "Đang tạo...") : (isEdit ? "Cập nhật khách sạn" : "Thêm khách sạn")}
+          {isSubmitting
+            ? isEdit ? "Đang cập nhật..." : "Đang tạo..."
+            : isEdit ? "Cập nhật khách sạn" : "Thêm khách sạn"}
         </Button>
       </div>
+
     </form>
   );
 }

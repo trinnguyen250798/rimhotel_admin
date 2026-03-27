@@ -69,27 +69,55 @@ export interface HotelResponse {
 
 export interface HotelFormData {
   ulid: string | null;
-  name: string;
-  description: string;
-  address: string;
 
-  district_code: string;
+  // Required
+  name: string;
+  address: string;
   province_code: string;
   country_code: string;
 
-  latitude: string;   // hoặc number nếu bệ hạ parse trước
-  longitude: string;  // idem
+  // Nullable location
+  district_code: string;
+  latitude: string;
+  longitude: string;
 
-  star_rating: number;
-
-  checkin_time: string;   // format "HH:mm:ss"
-  checkout_time: string;  // format "HH:mm:ss"
-
+  // General info
+  star_rating: number | null;
+  checkin_time: string;
+  checkout_time: string;
   phone: string;
   email: string;
   website: string;
+  status: 0 | 1;
+  type: string;
 
-  status: boolean; // 1 | 0 nếu muốn strict hơn
+  // Description & SEO
+  short_description: string;
+  meta_title: string;
+  meta_description: string;
+
+  // Policies
+  checkin_policy: string;
+  checkout_policy: string;
+
+  // Stats (admin-editable)
+  rating_avg: number | null;
+  rating_count: number | null;
+  price_from: number | null;
+  price_to: number | null;
+  total_images: number | null;
+  booking_count: number | null;
+  view_count: number | null;
+
+  // Flags
+  is_refundable: boolean;
+  is_free_cancellation: boolean;
+  is_featured: boolean;
+  is_top_deal: boolean;
+
+  // Arrays
+  languages: string[];
+  payment_options: string[];
 }
 
 export interface HotelType {
