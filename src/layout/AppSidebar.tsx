@@ -30,16 +30,21 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     icon: <GridIcon />,
-    name: "Bảng điều khiển",
-    subItems: [{ name: "Thương mại điện tử", path: "/", pro: false }],
+    name: "Trang chủ",
+    path: "/",
   },
   {
     icon: <HotelIcon />,
     name: "Quản lý khách sạn",
     subItems: [
-      { name: "Danh sách khách sạn", path: "/hotel", pro: false },
-      { name: "Thêm khách sạn", path: "/hotel/create", pro: false },
+      { name: "Thông tin khách sạn", path: "/hotel", pro: false },
+      { name: "Quản lý Hình ảnh", path: "/hotel/image", pro: false },
     ],
+  },
+  {
+    name: "Quản lý nhân viên",
+    icon: <TableIcon />,
+    subItems: [{ name: "Danh sách nhân viên", path: "/staff", pro: false }],
   },
   {
     icon: <CalenderIcon />,
@@ -57,11 +62,7 @@ const navItems: NavItem[] = [
     icon: <ListIcon />,
     subItems: [{ name: "Các yếu tố biểu mẫu", path: "/form-elements", pro: false }],
   },
-  {
-    name: "Bảng",
-    icon: <TableIcon />,
-    subItems: [{ name: "Bảng cơ bản", path: "/basic-tables", pro: false }],
-  },
+  
   {
     name: "Trang",
     icon: <PageIcon />,

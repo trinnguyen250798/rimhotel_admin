@@ -5,7 +5,7 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Button from "@/components/ui/button/Button";
 import TextArea from "@/components/form/input/TextArea";
-import { Hotel, HotelFormData } from "@/types/hotel";
+import { Amenity, Hotel, HotelFormData, HotelType } from "@/types/hotel";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Select from "@/components/form/Select";
@@ -13,6 +13,7 @@ import { fetchProvincesByCountry, fetchDistrictsByProvince } from "@/store/slice
 import GoongAddress from "@/components/map/goong";
 import { useAppDispatch } from "@/store/hooks";
 import { Country, Province, District } from "@/types/location";
+import { HotelService } from "@/services/hotel.service";
 
 interface HotelFormProps {
   initialData?: Partial<Hotel>;
@@ -71,13 +72,13 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     checkout_policy: initialData?.checkout_policy || "",
 
     // Stats
-    rating_avg: initialData?.rating_avg ?? null,
-    rating_count: initialData?.rating_count ?? null,
-    price_from: initialData?.price_from ?? null,
-    price_to: initialData?.price_to ?? null,
-    total_images: initialData?.total_images ?? null,
-    booking_count: initialData?.booking_count ?? null,
-    view_count: initialData?.view_count ?? null,
+    rating_avg: initialData?.rating_avg ?? 0,
+    rating_count: initialData?.rating_count ?? 0,
+    price_from: initialData?.price_from ?? 0,
+    price_to: initialData?.price_to ?? 0,
+    total_images: initialData?.total_images ?? 0,
+    booking_count: initialData?.booking_count ?? 0,
+    view_count: initialData?.view_count ?? 0,
 
     // Flags
     is_refundable: initialData?.is_refundable ?? false,
@@ -88,9 +89,10 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     // Arrays
     languages: initialData?.languages || [],
     payment_options: initialData?.payment_options || [],
+    amenity_ids: initialData?.amenities?.map((a) => a.id) || [],
   });
 
-  const handleChange = (name: string, value: string | number | boolean | null | string[]) => {
+  const handleChange = (name: string, value: string | number | boolean | null | string[] | number[]) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -139,6 +141,35 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
     }
   }, [formData.province_code, districtsState, dispatch]);
 
+
+  const [amenities, setAmenities] = useState<Amenity[]>([]);
+  const [hotelTypes, setHotelTypes] = useState<HotelType[]>([]);
+
+  const fetchAmenities = async () => {
+    try {
+      const data = await HotelService.getAmenities();
+      setAmenities(data);
+    } catch (err) {
+      console.error("Failed to fetch amenities", err);
+    }
+  };
+
+  const fetchHotelTypes = async () => {
+    try {
+      const data = await HotelService.getTypes();
+      setHotelTypes(data);
+    } catch (err) {
+      console.error("Failed to fetch hotel types", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAmenities();
+    fetchHotelTypes();
+  }, []);
+
+
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
 
@@ -162,12 +193,13 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
 
           <div className="col-span-1">
             <Label htmlFor="type">Loại khách sạn</Label>
-            <Input
+            <Select
               id="type"
               name="type"
-              placeholder="vd: hotel, resort, hostel..."
+              options={hotelTypes.map((t) => ({ value: t.id, label: t.name }))}
               value={formData.type}
-              onChange={handleInputChange}
+              onChange={(value) => handleChange("type", value)}
+              placeholder="Chọn loại khách sạn"
               error={!!getFieldError("type")}
               hint={getFieldError("type")}
             />
@@ -499,6 +531,77 @@ export default function HotelForm({ initialData, onSubmit, isSubmitting, errors 
           ))}
 
         </div>
+      </div>
+
+      <hr className="border-gray-200 dark:border-white/[0.05]" />
+
+      {/* ── Amenities ── */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">Tiện nghi</h3>
+        {amenities.length === 0 ? (
+          <p className="text-sm text-gray-400 dark:text-gray-500">Đang tải tiện nghi...</p>
+        ) : (
+          <div className="space-y-5">
+            {Object.entries(
+              amenities.reduce<Record<string, typeof amenities>>((groups, amenity) => {
+                const cat = amenity.category || "Khác";
+                if (!groups[cat]) groups[cat] = [];
+                groups[cat].push(amenity);
+                return groups;
+              }, {})
+            ).map(([category, items]) => {
+              const groupIds = items.map((a) => a.id);
+              const allChecked = groupIds.every((id) => formData.amenity_ids.includes(id));
+              return (
+              <div key={category}>
+                <div className="mb-2 flex items-center gap-3">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    {category}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const withoutGroup = formData.amenity_ids.filter((id) => !groupIds.includes(id));
+                      const updated = allChecked ? withoutGroup : [...withoutGroup, ...groupIds];
+                      handleChange("amenity_ids", updated);
+                    }}
+                    className="text-xs text-brand-500 hover:text-brand-600 dark:text-brand-400 dark:hover:text-brand-300 underline underline-offset-2"
+                  >
+                    {allChecked ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+                  {items.map((amenity) => {
+                    const checked = formData.amenity_ids.includes(amenity.id);
+                    return (
+                      <label
+                        key={amenity.id}
+                        className="flex items-center gap-2 cursor-pointer select-none"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {
+                            const updated = checked
+                              ? formData.amenity_ids.filter((id) => id !== amenity.id)
+                              : [...formData.amenity_ids, amenity.id];
+                            handleChange("amenity_ids", updated);
+                          }}
+                          className="w-4 h-4 accent-brand-500"
+                        />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {amenity.icon && <span className="mr-1"><i className={amenity.icon}></i></span>}
+                          {amenity.name}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <hr className="border-gray-200 dark:border-white/[0.05]" />

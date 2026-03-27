@@ -80,26 +80,26 @@ export default function HotelTable({ hotels, onDelete }: HotelTableProps) {
             ) : (
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                 {hotels.map((hotel) => (
-                  <TableRow key={hotel.id}>
+                  <TableRow key={hotel.ulid}>
                     <TableCell className="px-5 py-4 sm:px-6 text-start">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 overflow-hidden rounded-full relative">
                           <Image
                             fill
                             src="/images/hotel/placeholder.jpg"
-                            alt={hotel.hotel_name}
+                            alt={hotel.name}
                             className="object-cover"
                           />
                         </div>
                         <div>
                           <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                            {hotel.hotel_name}
+                            {hotel.name}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {`${hotel.ward}, ${hotel.district}, ${hotel.city}`}
+                      {`${hotel.address}, ${hotel.district?.name}, ${hotel.province?.name}`}
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                       {hotel.star_rating} Sao
@@ -114,11 +114,11 @@ export default function HotelTable({ hotels, onDelete }: HotelTableProps) {
                     </TableCell>
                     <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                       <div className="flex items-center gap-2">
-                        <Link href={`/hotel/${hotel.id}`} className="text-primary hover:underline">
+                        <Link href={`/hotel/${hotel.ulid}`} className="text-primary hover:underline">
                           Sửa
                         </Link>
                         <button
-                          onClick={() => onDelete(String(hotel.id))}
+                          onClick={() => onDelete(String(hotel.ulid))}
                           className="text-error hover:underline text-red-500"
                         >
                           Xóa

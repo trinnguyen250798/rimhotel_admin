@@ -24,12 +24,12 @@ export const HotelService = {
   },
 
   getTypes: async (): Promise<HotelType[]> => {
-    const response = await axiosClient.get("/getType");
-    return response.data;
+    const response = await axiosClient.get("/type-hotel");
+    return response.data.data;
   },
 
   getAmenities: async (): Promise<Amenity[]> => {
-    const response = await axiosClient.get("/getAmenities");
-    return response.data;
+    const response = await axiosClient.get("/amenities");
+    return response.data.data;
   },
 };

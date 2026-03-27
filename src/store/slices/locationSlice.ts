@@ -26,7 +26,6 @@ export const fetchCountries = createAsyncThunk(
   'location/fetchCountries',
   async () => {
     const res = await locationService.getCountries();
-    console.log(res);
     return res.data;
   }
 );

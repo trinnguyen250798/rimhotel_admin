@@ -2,6 +2,7 @@ export interface Amenity {
   id: number;
   name: string;
   icon: string;
+  category: string;
 }
 
 export interface Hotel {
@@ -118,11 +119,11 @@ export interface HotelFormData {
   // Arrays
   languages: string[];
   payment_options: string[];
+  amenity_ids: number[];
 }
 
 export interface HotelType {
-  id: number;
+  id: string | number;
   name: string;
-  icon: string;
 }
 
