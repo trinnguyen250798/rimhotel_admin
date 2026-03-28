@@ -29,3 +29,21 @@ export interface StaffFormData {
     position_id: number;
     hotel_id: string | number;
 }
+
+export interface Department {
+    id: number;
+    name: string;
+}
+
+export interface Position {
+    id: number;
+    name: string;
+}
+
+export interface DepartmentPayload {
+    name: string;
+}
+
+export interface PositionPayload {
+    name: string;
+}
