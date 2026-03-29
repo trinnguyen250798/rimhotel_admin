@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { StaffService, DepartmentService, PositionService } from "@/services/staff.service";
+import { StaffFormData } from "@/types/staff";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -13,9 +14,46 @@ export const STAFF_QUERY_KEYS = {
 
 export const useStaffs = () =>
   useQuery({
-    queryKey: STAFF_QUERY_KEYS.staffs,
-    queryFn: StaffService.getAll,
+    queryKey: [...STAFF_QUERY_KEYS.staffs],
+    queryFn: () => StaffService.getAll(),
   });
+
+export const useStaffMutations = (onSuccess: () => void) => {
+  const queryClient = useQueryClient();
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: STAFF_QUERY_KEYS.staffs });
+
+  const addMutation = useMutation({
+    mutationFn: (payload: Omit<StaffFormData, "ulid">) => StaffService.create(payload),
+    onSuccess: () => { invalidate(); onSuccess(); },
+    onError: (error) => {
+      console.error("Lỗi khi thêm nhân viên:", error);
+      alert("Có lỗi xảy ra khi thêm nhân viên!");
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ ulid, payload }: { ulid: string; payload: Omit<StaffFormData, "ulid"> }) =>
+      StaffService.update(ulid, payload),
+    onSuccess: () => { invalidate(); onSuccess(); },
+    onError: (error) => {
+      console.error("Lỗi khi cập nhật nhân viên:", error);
+      alert("Có lỗi xảy ra khi cập nhật nhân viên!");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (ulid: string) => StaffService.delete(ulid),
+    onSuccess: invalidate,
+    onError: (error) => {
+      console.error("Lỗi khi xóa nhân viên:", error);
+      alert("Có lỗi xảy ra khi xóa nhân viên!");
+    },
+  });
+
+  return { addMutation, updateMutation, deleteMutation };
+};
 
 // ─── Departments ──────────────────────────────────────────────────────────────
 

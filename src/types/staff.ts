@@ -24,10 +24,12 @@ export interface StaffFormData {
     email: string;
     name: string;
     phone: string;
-    role_id: number;
+    password?: string;
+    country_id: number | string;
+    province_id: number | string;
+    district_id: number | string;
     department_id: number;
     position_id: number;
-    hotel_id: string | number;
 }
 
 export interface Department {

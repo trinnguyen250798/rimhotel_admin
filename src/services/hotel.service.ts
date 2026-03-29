@@ -9,7 +9,7 @@ export const HotelService = {
   },
   getById: async (id: string | number): Promise<Hotel> => {
     const response = await axiosClient.get(`/admin/hotels/${id}`);
-    return response.data;
+    return response.data.data;
   },
   create: async (data: HotelFormData): Promise<Hotel> => {
     const response = await axiosClient.post("/admin/hotels", data);

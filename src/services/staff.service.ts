@@ -1,6 +1,7 @@
 import axiosClient from "@/lib/axios";
-import { Staff, Department, DepartmentPayload, Position, PositionPayload } from "@/types/staff";
-
+import { Staff, Department, DepartmentPayload, Position, PositionPayload, StaffFormData } from "@/types/staff";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 // ─── Staff ────────────────────────────────────────────────────────────────────
 
 export const StaffService = {
@@ -9,6 +10,15 @@ export const StaffService = {
     const data = res.data.data || res.data;
     return Array.isArray(data) ? data : [];
   },
+
+  create: (payload: Omit<StaffFormData, "ulid">) =>
+    axiosClient.post("/admin/staff", payload),
+
+  update: (ulid: string, payload: Omit<StaffFormData, "ulid">) =>
+    axiosClient.put(`/admin/staff/${ulid}`, payload),
+
+  delete: (ulid: string) =>
+    axiosClient.delete(`/admin/staff/${ulid}`),
 };
 
 // ─── Departments ──────────────────────────────────────────────────────────────

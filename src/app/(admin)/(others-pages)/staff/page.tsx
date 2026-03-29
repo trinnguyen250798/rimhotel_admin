@@ -1,5 +1,7 @@
 "use client";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 import {
   Table,
   TableBody,
@@ -13,13 +15,45 @@ import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import { Staff, Department, Position } from "@/types/staff";
-import { useStaffs, useDepartments, usePositions, useDepartmentMutations, usePositionMutations } from "@/hooks/useStaff";
+import Select from "@/components/form/Select";
+import { Province, District } from "@/types/location";
+import { useAppDispatch } from "@/store/hooks";
+import { fetchProvincesByCountry, fetchDistrictsByProvince } from "@/store/slices/locationSlice";
+import { Staff, Department, Position, StaffFormData } from "@/types/staff";
+import {
+  useStaffs,
+  useStaffMutations,
+  useDepartments,
+  usePositions,
+  useDepartmentMutations,
+  usePositionMutations,
+} from "@/hooks/useStaff";
+
+const EMPTY_STAFF_FORM: Omit<StaffFormData, "ulid"> = {
+  name: "",
+  email: "",
+  phone: "",
+  password: "",
+  country_id: "",
+  province_id: "",
+  district_id: "",
+  department_id: 0,
+  position_id: 0,
+};
 
 export default function StaffPage() {
   // ─── Modal visibility ──────────────────────────────────────────────────────
+  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
   const [isDeptModalOpen, setIsDeptModalOpen] = useState(false);
   const [isPosModalOpen, setIsPosModalOpen] = useState(false);
+
+  // ─── Staff form state ──────────────────────────────────────────────────────
+  const [staffForm, setStaffForm] = useState<Omit<StaffFormData, "ulid">>(EMPTY_STAFF_FORM);
+
+  const setStaffField = <K extends keyof typeof EMPTY_STAFF_FORM>(
+    field: K,
+    value: (typeof EMPTY_STAFF_FORM)[K]
+  ) => setStaffForm((prev) => ({ ...prev, [field]: value }));
 
   // ─── Department form state ─────────────────────────────────────────────────
   const [deptName, setDeptName] = useState("");
@@ -29,10 +63,78 @@ export default function StaffPage() {
   const [posName, setPosName] = useState("");
   const [editingPosId, setEditingPosId] = useState<number | null>(null);
 
+  // ─── Location Data Fetching ────────────────────────────────────────────────
+  const dispatch = useAppDispatch();
+  const countries = useSelector((state: RootState) => state.location.countries);
+  const provincesState = useSelector((state: RootState) => state.location.provinces);
+  const districtsState = useSelector((state: RootState) => state.location.districts);
+  const [province, setProvince] = useState<Province[]>([]);
+  const [district, setDistrict] = useState<District[]>([]);
+
+  React.useEffect(() => {
+    if (staffForm.country_id) {
+      const country = countries.find((c) => String(c.id) === staffForm.country_id);
+      const data = provincesState[country?.code || ""];
+      if (data) {
+        setProvince(data);
+      } else {
+        dispatch(fetchProvincesByCountry(country?.code || ""));
+      }
+    } else {
+      setProvince([]);
+    }
+  }, [staffForm.country_id, provincesState, dispatch]);
+
+  React.useEffect(() => {
+    if (staffForm.province_id) {
+      const province = provinces.find((p) => String(p.id) === staffForm.province_id);
+      const data = districtsState[province?.code || ""];
+      if (data) {
+        setDistrict(data);
+      } else {
+        dispatch(fetchDistrictsByProvince(province?.code || ""));
+      }
+    } else {
+      setDistrict([]);
+    }
+  }, [staffForm.province_id, districtsState, dispatch]);
+
+  // ─── Hotel ID (lấy từ HotelCurrent) ─────────────────────────────────────────
+  const hotelCurrent = useSelector((state: RootState) => state.hotelCurrent.hotelCurrent);
+  const hotelId =
+    hotelCurrent?.ulid ||
+    (hotelCurrent as any)?.data?.ulid ||
+    (typeof window !== "undefined" ? localStorage.getItem("hotelIdCurrent") : "") ||
+    "";
+
   // ─── Data fetching ─────────────────────────────────────────────────────────
   const { data: staffList = [], isLoading: isLoadingStaff } = useStaffs();
-  const { data: departments = [], isLoading: isLoadingDepts } = useDepartments(isDeptModalOpen);
-  const { data: positions = [], isLoading: isLoadingPos } = usePositions(isPosModalOpen);
+  const { data: departments = [], isLoading: isLoadingDepts } = useDepartments(isDeptModalOpen || isStaffModalOpen);
+  const { data: positions = [], isLoading: isLoadingPos } = usePositions(isPosModalOpen || isStaffModalOpen);
+
+  // ─── Staff mutations ───────────────────────────────────────────────────────
+  const handleStaffModalClose = () => {
+    setIsStaffModalOpen(false);
+    setStaffForm(EMPTY_STAFF_FORM);
+  };
+  const { addMutation: addStaff } = useStaffMutations(handleStaffModalClose);
+
+  const handleSubmitStaff = () => {
+    if (!staffForm.name.trim()) { alert("Vui lòng nhập họ tên!"); return; }
+    if (!staffForm.email.trim()) { alert("Vui lòng nhập email!"); return; }
+    if (!staffForm.phone.trim()) { alert("Vui lòng nhập số điện thoại!"); return; }
+    if (!staffForm.password?.trim()) { alert("Vui lòng nhập mật khẩu!"); return; }
+    if (!staffForm.country_id) { alert("Vui lòng chọn quốc gia!"); return; }
+    if (!staffForm.province_id) { alert("Vui lòng chọn tỉnh thành!"); return; }
+
+    addStaff.mutate(staffForm);
+  };
+
+  // Khi mở modal thêm nhân viên, reset form
+  const handleOpenStaffModal = () => {
+    setStaffForm(EMPTY_STAFF_FORM);
+    setIsStaffModalOpen(true);
+  };
 
   // ─── Department mutations ──────────────────────────────────────────────────
   const handleCancelEditDept = () => { setEditingDeptId(null); setDeptName(""); };
@@ -74,6 +176,7 @@ export default function StaffPage() {
     }
   };
 
+  const isSubmittingStaff = addStaff.isPending;
   const isSubmittingDept = addDept.isPending || updateDept.isPending;
   const isSubmittingPos = addPos.isPending || updatePos.isPending;
 
@@ -81,7 +184,8 @@ export default function StaffPage() {
   return (
     <div>
       {/* Action bar */}
-      <div className="flex justify-end gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-end gap-3 mb-6">
+        <Button size="xs" onClick={handleOpenStaffModal}>Thêm nhân viên</Button>
         <Button size="xs" onClick={() => setIsDeptModalOpen(true)}>Thêm phòng ban</Button>
         <Button size="xs" onClick={() => setIsPosModalOpen(true)}>Thêm chức vụ</Button>
       </div>
@@ -146,6 +250,154 @@ export default function StaffPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal: Thêm nhân viên */}
+      <Modal
+        isOpen={isStaffModalOpen}
+        onClose={handleStaffModalClose}
+        className="max-w-[800px] p-6"
+      >
+        <div className="flex flex-col gap-4">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Thêm nhân viên</h3>
+
+          {/* Row 1: Name + Email */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="staffName">Họ và tên <span className="text-error-500">*</span></Label>
+              <Input
+                type="text"
+                id="staffName"
+                placeholder="Nhập họ và tên..."
+                value={staffForm.name}
+                onChange={(e) => setStaffField("name", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="staffEmail">Email <span className="text-error-500">*</span></Label>
+              <Input
+                type="email"
+                id="staffEmail"
+                placeholder="Nhập email..."
+                value={staffForm.email}
+                onChange={(e) => setStaffField("email", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Phone + Password */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="staffPhone">Số điện thoại <span className="text-error-500">*</span></Label>
+              <Input
+                type="text"
+                id="staffPhone"
+                placeholder="Nhập SĐT..."
+                value={staffForm.phone}
+                onChange={(e) => setStaffField("phone", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="staffPassword">Mật khẩu <span className="text-error-500">*</span></Label>
+              <Input
+                type="password"
+                id="staffPassword"
+                placeholder="Nhập mật khẩu..."
+                value={staffForm.password || ""}
+                onChange={(e) => setStaffField("password", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Country + Province + District */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="staffCountry">Quốc gia <span className="text-error-500">*</span></Label>
+              <Select
+                id="staffCountry"
+                options={countries.map((c) => ({ value: String(c.id), label: c.name }))}
+                value={String(staffForm.country_id)}
+                onChange={(val) => {
+                  setStaffField("country_id", val ?? "");
+                  setStaffField("province_id", "");
+                  setStaffField("district_id", "");
+                }}
+                placeholder="Chọn quốc gia"
+              />
+            </div>
+            <div>
+              <Label htmlFor="staffProvince">Tỉnh thành <span className="text-error-500">*</span></Label>
+              <Select
+                id="staffProvince"
+                options={province.map((p) => ({ value: String(p.id), label: p.name }))}
+                value={String(staffForm.province_id)}
+                onChange={(val) => {
+                  setStaffField("province_id", val ?? "");
+                  setStaffField("district_id", "");
+                }}
+                placeholder="Chọn tỉnh thành"
+              />
+            </div>
+            <div>
+              <Label htmlFor="staffDistrict">Quận huyện <span className="text-error-500">*</span></Label>
+              <Select
+                id="staffDistrict"
+                options={district.map((d) => ({ value: String(d.id), label: d.name }))}
+                value={String(staffForm.district_id)}
+                onChange={(val) => setStaffField("district_id", val ?? "")}
+                placeholder="Chọn quận huyện"
+              />
+            </div>
+          </div>
+
+          {/* Row 4: Department + Position */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="staffDept">Phòng ban</Label>
+              <select
+                id="staffDept"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-brand-500 focus:outline-none dark:border-white/[0.15] dark:bg-white/[0.05] dark:text-white"
+                value={staffForm.department_id}
+                onChange={(e) => setStaffField("department_id", Number(e.target.value))}
+              >
+                <option value={0}>-- Chọn phòng ban --</option>
+                {isLoadingDepts ? (
+                  <option disabled>Đang tải...</option>
+                ) : (
+                  departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))
+                )}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="staffPos">Chức vụ</Label>
+              <select
+                id="staffPos"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-brand-500 focus:outline-none dark:border-white/[0.15] dark:bg-white/[0.05] dark:text-white"
+                value={staffForm.position_id}
+                onChange={(e) => setStaffField("position_id", Number(e.target.value))}
+              >
+                <option value={0}>-- Chọn chức vụ --</option>
+                {isLoadingPos ? (
+                  <option disabled>Đang tải...</option>
+                ) : (
+                  positions.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))
+                )}
+              </select>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 mt-2">
+            <Button size="xs" variant="outline" onClick={handleStaffModalClose} disabled={isSubmittingStaff}>Đóng</Button>
+            <Button size="xs" onClick={handleSubmitStaff} disabled={isSubmittingStaff}>
+              {isSubmittingStaff ? "Đang lưu..." : "Lưu"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Modal: Phòng ban */}
       <Modal
