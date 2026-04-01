@@ -1,11 +1,10 @@
 import axiosClient from "@/lib/axios";
-import { Staff, Department, DepartmentPayload, Position, PositionPayload, StaffFormData } from "@/types/staff";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { StaffDB, Staff, Department, DepartmentPayload, Position, PositionPayload, StaffFormData } from "@/types/staff";
+
 // ─── Staff ────────────────────────────────────────────────────────────────────
 
 export const StaffService = {
-  getAll: async (): Promise<Staff[]> => {
+  getAll: async (): Promise<StaffDB[]> => {
     const res = await axiosClient.get("/admin/staff");
     const data = res.data.data || res.data;
     return Array.isArray(data) ? data : [];

@@ -65,8 +65,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setUser(userData);
     setIsAuthenticated(true);
-
-    router.replace("/home");
+    if(userData.role_id == 1 || userData.role_id == 3){
+      router.replace("/home");
+    }else if(userData.role_id == 4){
+         localStorage.setItem("hotelIdCurrent", String(userData.hotel_id));
+         console.log(userData.hotel_id);
+        router.replace("/");
+    }else{
+        logout();
+    }
   };
   const logout = () => {
     localStorage.removeItem("token");

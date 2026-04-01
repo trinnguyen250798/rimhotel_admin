@@ -46,8 +46,8 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     subItems: [
       { name: "Danh sách nhân viên", path: "/staff", pro: false },
-      { name: "Quản lý Phòng ban", path: "/department", pro: false },
-      { name: "Quản lý Chức vụ", path: "/position", pro: false },
+    //   { name: "Quản lý Phòng ban", path: "/department", pro: false },
+    //   { name: "Quản lý Chức vụ", path: "/position", pro: false },
     ],
   },
   {

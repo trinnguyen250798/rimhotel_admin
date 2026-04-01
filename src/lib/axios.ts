@@ -1,6 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { log } from 'console';
-import { store } from "@/store";
+
+let injectedStore: any;
+
+export const injectStore = (store: any) => {
+  injectedStore = store;
+};
+
 // Default config for the axios instance
 const config: AxiosRequestConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
@@ -26,9 +32,11 @@ axiosClient.interceptors.request.use(
       if (token && config.headers && !isLoginRequest) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      const hotelCurrent = store.getState().hotelCurrent.hotelCurrent;
-      if (hotelCurrent?.ulid) {
-        config.headers["X-Hotel-KEY"] = hotelCurrent.ulid;
+      if (injectedStore) {
+        const hotelCurrent = injectedStore.getState().hotelCurrent?.hotelCurrent;
+        if (hotelCurrent?.ulid) {
+          config.headers["X-Hotel-KEY"] = hotelCurrent.ulid;
+        }
       }
 
     }

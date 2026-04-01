@@ -5,10 +5,15 @@ export interface User {
   phone: string;
   role: string;
   role_id: number;
-  avatar?: string;
-  // Add other user properties as needed
+  avatar?: Avatar | null;
+  hotel_id?: string | null;
 }
-
+export interface Avatar {
+    thumb: string;
+    small: string;
+    medium: string;
+    large: string;
+}
 export interface LoginCredentials {
   email: string;
   password?: string;

@@ -44,7 +44,7 @@ export default function AdminLayout({
         return;
       }
       if (!hotelCurrent) {
-        const hotelIdCurrent = localStorage.getItem("hotelIdCurrent");
+        const hotelIdCurrent = localStorage.getItem("hotelIdCurrent") || sessionStorage.getItem("hotelIdCurrent");
         if (!hotelIdCurrent) {
           router.push("/home");
           return;
@@ -54,6 +54,7 @@ export default function AdminLayout({
           dispatch(setHotelCurrent(data));
         } catch (err) {
           console.error("Failed to fetch hotel", err);
+          router.push("/home");
         }
       }
       setLoading(false);
@@ -66,9 +67,22 @@ export default function AdminLayout({
       ? "lg:ml-[290px]"
       : "lg:ml-[90px]";
 
-  if (loading) {
-    return <div className="p-6">Loading...</div>;
-  }
+ if (loading) {
+  return (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-white/80 backdrop-blur-sm">
+      <div className="flex flex-col items-center">
+        <div className="flex space-x-2">
+          <div className="h-3 w-3 animate-bounce rounded-full bg-blue-600 [animation-delay:-0.3s]"></div>
+          <div className="h-3 w-3 animate-bounce rounded-full bg-blue-600 [animation-delay:-0.15s]"></div>
+          <div className="h-3 w-3 animate-bounce rounded-full bg-blue-600"></div>
+        </div>
+        <span className="mt-4 text-xs font-semibold uppercase tracking-widest text-gray-400">
+          Loading...
+        </span>
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen xl:flex">

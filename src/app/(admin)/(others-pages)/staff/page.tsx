@@ -19,7 +19,7 @@ import Select from "@/components/form/Select";
 import { Province, District } from "@/types/location";
 import { useAppDispatch } from "@/store/hooks";
 import { fetchProvincesByCountry, fetchDistrictsByProvince } from "@/store/slices/locationSlice";
-import { Staff, Department, Position, StaffFormData } from "@/types/staff";
+import { StaffDB,Staff, Department, Position, StaffFormData } from "@/types/staff";
 import {
   useStaffs,
   useStaffMutations,
@@ -29,7 +29,8 @@ import {
   usePositionMutations,
 } from "@/hooks/useStaff";
 
-const EMPTY_STAFF_FORM: Omit<StaffFormData, "ulid"> = {
+const EMPTY_STAFF_FORM: StaffFormData = {
+  ulid: null,
   name: "",
   email: "",
   phone: "",
@@ -48,11 +49,11 @@ export default function StaffPage() {
   const [isPosModalOpen, setIsPosModalOpen] = useState(false);
 
   // ─── Staff form state ──────────────────────────────────────────────────────
-  const [staffForm, setStaffForm] = useState<Omit<StaffFormData, "ulid">>(EMPTY_STAFF_FORM);
+  const [staffForm, setStaffForm] = useState<StaffFormData>(EMPTY_STAFF_FORM);
 
-  const setStaffField = <K extends keyof typeof EMPTY_STAFF_FORM>(
+  const setStaffField = <K extends keyof StaffFormData>(
     field: K,
-    value: (typeof EMPTY_STAFF_FORM)[K]
+    value: StaffFormData[K]
   ) => setStaffForm((prev) => ({ ...prev, [field]: value }));
 
   // ─── Department form state ─────────────────────────────────────────────────
@@ -87,12 +88,12 @@ export default function StaffPage() {
 
   React.useEffect(() => {
     if (staffForm.province_id) {
-      const province = provinces.find((p) => String(p.id) === staffForm.province_id);
-      const data = districtsState[province?.code || ""];
+      const provincce = province.find((p) => String(p.id) === staffForm.province_id);
+      const data = districtsState[provincce?.code || ""];
       if (data) {
         setDistrict(data);
       } else {
-        dispatch(fetchDistrictsByProvince(province?.code || ""));
+        dispatch(fetchDistrictsByProvince(provincce?.code || ""));
       }
     } else {
       setDistrict([]);
@@ -117,17 +118,43 @@ export default function StaffPage() {
     setIsStaffModalOpen(false);
     setStaffForm(EMPTY_STAFF_FORM);
   };
-  const { addMutation: addStaff } = useStaffMutations(handleStaffModalClose);
+  const { addMutation: addStaff, updateMutation: updateStaff, deleteMutation: deleteStaff } = useStaffMutations(handleStaffModalClose);
 
   const handleSubmitStaff = () => {
     if (!staffForm.name.trim()) { alert("Vui lòng nhập họ tên!"); return; }
     if (!staffForm.email.trim()) { alert("Vui lòng nhập email!"); return; }
     if (!staffForm.phone.trim()) { alert("Vui lòng nhập số điện thoại!"); return; }
-    if (!staffForm.password?.trim()) { alert("Vui lòng nhập mật khẩu!"); return; }
+    if (!staffForm.ulid && !staffForm.password?.trim()) { alert("Vui lòng nhập mật khẩu!"); return; }
     if (!staffForm.country_id) { alert("Vui lòng chọn quốc gia!"); return; }
     if (!staffForm.province_id) { alert("Vui lòng chọn tỉnh thành!"); return; }
 
-    addStaff.mutate(staffForm);
+    const { ulid, ...payloadData } = staffForm;
+    if (ulid) {
+      updateStaff.mutate({ ulid, payload: payloadData });
+    } else {
+      addStaff.mutate(payloadData);
+    }
+  };
+
+  const handleEditStaff = (staff: StaffDB) => {
+    setStaffForm({
+      ulid: staff.ulid,
+      name: staff.user?.name || "",
+      email: staff.user?.email || "",
+      phone: staff.user?.phone || "",
+      password: "", 
+      country_id: String(staff.user?.country_id || ""),
+      province_id: String(staff.user?.province_id || ""),
+      district_id: String(staff.user?.district_id || ""),
+      department_id: staff.department_id || 0,
+      position_id: staff.position_id || 0,
+    });
+    setIsStaffModalOpen(true);
+  };
+
+  const handleDeleteStaff = (ulid: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) return;
+    deleteStaff.mutate(ulid);
   };
 
   // Khi mở modal thêm nhân viên, reset form
@@ -176,7 +203,7 @@ export default function StaffPage() {
     }
   };
 
-  const isSubmittingStaff = addStaff.isPending;
+  const isSubmittingStaff = addStaff.isPending || updateStaff.isPending;
   const isSubmittingDept = addDept.isPending || updateDept.isPending;
   const isSubmittingPos = addPos.isPending || updatePos.isPending;
 
@@ -198,7 +225,7 @@ export default function StaffPage() {
               <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                 <TableRow>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Nhân viên</TableCell>
-                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Liên hệ</TableCell>
+                  <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Phòng ban / Chức vụ</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">Vai trò (Role)</TableCell>
                   <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-end text-theme-xs dark:text-gray-400">Thao tác</TableCell>
                 </TableRow>
@@ -213,34 +240,38 @@ export default function StaffPage() {
                     <TableCell colSpan={4} className="px-5 py-4 text-center text-gray-500">Chưa có nhân viên nào.</TableCell>
                   </TableRow>
                 ) : (
-                  staffList.map((staff: Staff) => (
+                  staffList.map((staff: StaffDB) => (
                     <TableRow key={staff.ulid || Math.random().toString()}>
                       <TableCell className="px-5 py-4 sm:px-6 text-start">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100 flex items-center justify-center relative">
-                            {staff.avatar ? (
-                              <Image fill src={staff.avatar} className="object-cover" alt="User" />
+                            {staff.user.avatar ? (
+                              <Image fill src={staff.user.avatar} className="object-cover" alt="User" />
                             ) : (
-                              <span className="text-gray-500 font-bold uppercase">{staff.name?.charAt(0) || "U"}</span>
+                              <span className="text-gray-500 font-bold uppercase">{staff.user.name?.charAt(0) || "U"}</span>
                             )}
                           </div>
                           <div>
-                            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">{staff.name}</span>
-                            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">ID: {staff.ulid}</span>
+                            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">{staff.user.name}</span>
+                            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">Email: {staff.user.email}</span>
+                            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">Số điện thoại: {staff.user.phone}</span>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-start text-theme-sm">
                         <div className="flex flex-col">
-                          <span className="text-gray-800 dark:text-white/90">{staff.email}</span>
-                          <span className="text-gray-500 dark:text-gray-400">{staff.phone || "Chưa cập nhật SĐT"}</span>
+                          <span className="text-gray-800 dark:text-white/90">{staff.department?.name}</span>
+                          <span className="text-gray-500 dark:text-gray-400">{staff.position?.name || "Chưa cập nhật chức vụ"}</span>
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-start text-theme-sm">
-                        <Badge size="sm" color="success">{staff.role || "Nhân viên"}</Badge>
+                        <Badge size="sm" color="success">{staff.user.role || "Nhân viên"}</Badge>
                       </TableCell>
                       <TableCell className="px-4 py-3 text-end text-theme-sm">
-                        <button className="text-brand-500 hover:text-brand-600 transition-colors">Xem / Sửa</button>
+                        <div className="flex gap-3 justify-end items-center">
+                          <button onClick={() => handleEditStaff(staff)} className="text-brand-500 hover:text-brand-600 font-medium transition-colors">Sửa</button>
+                          <button onClick={() => handleDeleteStaff(staff.ulid)} className="text-error-500 hover:text-error-600 font-medium transition-colors">Xóa</button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -255,10 +286,12 @@ export default function StaffPage() {
       <Modal
         isOpen={isStaffModalOpen}
         onClose={handleStaffModalClose}
-        className="max-w-[800px] p-6"
+        className="max-w-[800px] p max-h-[80vh] overflow-y-auto-6"
       >
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Thêm nhân viên</h3>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            {staffForm.ulid ? "Cập nhật nhân viên" : "Thêm nhân viên"}
+          </h3>
 
           {/* Row 1: Name + Email */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -297,11 +330,11 @@ export default function StaffPage() {
               />
             </div>
             <div>
-              <Label htmlFor="staffPassword">Mật khẩu <span className="text-error-500">*</span></Label>
+              <Label htmlFor="staffPassword">Mật khẩu {!staffForm.ulid && <span className="text-error-500">*</span>}</Label>
               <Input
                 type="password"
                 id="staffPassword"
-                placeholder="Nhập mật khẩu..."
+                placeholder={staffForm.ulid ? "Bỏ trống nếu không đổi..." : "Nhập mật khẩu..."}
                 value={staffForm.password || ""}
                 onChange={(e) => setStaffField("password", e.target.value)}
               />
@@ -317,7 +350,7 @@ export default function StaffPage() {
                 options={countries.map((c) => ({ value: String(c.id), label: c.name }))}
                 value={String(staffForm.country_id)}
                 onChange={(val) => {
-                  setStaffField("country_id", val ?? "");
+                  setStaffField("country_id", (String(val) ?? "VN"));
                   setStaffField("province_id", "");
                   setStaffField("district_id", "");
                 }}
@@ -331,7 +364,7 @@ export default function StaffPage() {
                 options={province.map((p) => ({ value: String(p.id), label: p.name }))}
                 value={String(staffForm.province_id)}
                 onChange={(val) => {
-                  setStaffField("province_id", val ?? "");
+                  setStaffField("province_id", String(val) ?? "");
                   setStaffField("district_id", "");
                 }}
                 placeholder="Chọn tỉnh thành"
@@ -343,7 +376,7 @@ export default function StaffPage() {
                 id="staffDistrict"
                 options={district.map((d) => ({ value: String(d.id), label: d.name }))}
                 value={String(staffForm.district_id)}
-                onChange={(val) => setStaffField("district_id", val ?? "")}
+                onChange={(val) => setStaffField("district_id", String(val) ?? "")}
                 placeholder="Chọn quận huyện"
               />
             </div>
